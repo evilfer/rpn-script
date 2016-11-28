@@ -1,13 +1,16 @@
-import objMap from "../utils/obj-map";
+import objMap from "../../utils/obj-map";
+import range from "../../utils/range";
+import {numberType} from "../../maths/stack-types";
 
 const OPS = {
     '+': (a, b) => [a + b],
     '-': (a, b) => [a - b],
     '*': (a, b) => [a * b],
-    '?': (a, b, c) => a ? b : c
+    '/': (a, b) => [a / b],
+    '?': (a, b, c) => [c ? a : b]
 };
 
-const typeArray = n => Array.from(new Array(n).keys()).map(() => ({type: 'number'}));
+const typeArray = n => range(n).map(numberType);
 
 export default objMap(OPS, (f, key) => ({
     name: key,

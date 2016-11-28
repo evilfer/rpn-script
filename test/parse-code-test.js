@@ -1,5 +1,6 @@
 import {expect} from 'chai';
-import parseCode from "../src/parse-code";
+import parseCode from "../src/maths/parse-code";
+import {REDEFINE_VAR} from "../src/maths/error-types";
 
 
 describe('parseCode', () => {
@@ -38,6 +39,14 @@ describe('parseCode', () => {
         expect(namespace["a"]).to.equal(named[0]);
 
         expect(ordered.length).to.equal(0);
+    });
+
+
+    it('should check for repeated named expressions', () => {
+        let {lines: [a1, a2]} = parseCode("a=1\na=2");
+
+        expect(a1.expr.errors).to.equal(false);
+        expect(a2.expr.errors).to.eql([{type: REDEFINE_VAR}]);
     });
 
     it('should list all expressions', () => {

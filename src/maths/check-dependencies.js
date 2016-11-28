@@ -1,12 +1,14 @@
-import {addErrorContainer} from "./utils/add-error";
+import {addErrorContainer} from "./add-error";
 import {UNKNOWN_VAR, CIRCULAR_DEP} from "./error-types";
+import checkDependencyErrors from "./check-dependency-errors";
 
-export default function checkDependencies(scope, globalNamespace = {}) {
+export default function checkDependencies(scope) {
+    let {all, globalNamespace, named, unnamed, namespace} = scope;
     let solved = new Set();
-    let remaining = scope.named.map(e => e);
+    let remaining = named.map(e => e);
     let unknown = new Set();
 
-    scope.all.forEach(expr => {
+    all.forEach(expr => {
         expr.dependencies = [...new Set(expr.rhs.filter(({type}) => type === 'expr').map(({name}) => name))];
         expr.dependencies.forEach(name => {
             if (!scope.namespace[name] && !globalNamespace[name]) {
@@ -37,7 +39,11 @@ export default function checkDependencies(scope, globalNamespace = {}) {
         }
     }
 
-    scope.ordered = [...solved];
+    scope.ordered = [...solved]
+        .map(name => namespace[name])
+        .concat(unnamed);
+
+    checkDependencyErrors(scope);
 
     return scope;
 }
