@@ -7,9 +7,9 @@ import {REDEFINE_VAR} from "./error-types";
 export default function parseCode(codeText, globalNamespace = {}) {
     let codeLines = typeof codeText === 'string' ? codeText.replace(/\r/g, '').split('\n') : codeText;
 
-    let lines = codeLines.map(text => {
-        let code = text.trim();
-        let expr = code && parseExpression(code) || null;
+    let lines = codeLines.map(code => {
+        let trimmed = code.trim();
+        let expr = trimmed && parseExpression(trimmed) || null;
         return {
             code,
             expr

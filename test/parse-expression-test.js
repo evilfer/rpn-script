@@ -62,6 +62,25 @@ describe('parseExpression', () => {
         ]);
     });
 
+    describe('wrapped expressions', () => {
+        it('should identify token types', () => {
+            let {tokens} = parseExpression("x a = 1 2 + x (10 *)");
+            expect(tokens).to.deep.eql([
+                {type: 'arg', name: 'x', code: 'x'},
+                {type: 'name', code: 'a'},
+                {type: 'assign', code: '='},
+                {type: 'number', value: 1, code: '1'},
+                {type: 'number', value: 2, code: '2'},
+                {type: 'expr', name: '+', code: '+'},
+                {type: 'arg', name: 'x', code: 'x'},
+                {type: 'wo', code: '('},
+                {type: 'number', value: 10, code: '10'},
+                {type: 'expr', name: '*', code: '*'},
+                {type: 'wc', code: ')'}
+            ]);
+        });
+    });
+
 });
 
 

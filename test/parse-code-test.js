@@ -43,7 +43,7 @@ describe('parseCode', () => {
 
 
     it('should check for repeated named expressions', () => {
-        let {lines: [a1, a2]} = parseCode("a=1\na=2");
+        let {lines: [a1, a2]} = parseCode("a = 1\na = 2");
 
         expect(a1.expr.errors).to.equal(false);
         expect(a2.expr.errors).to.eql([{type: REDEFINE_VAR}]);
