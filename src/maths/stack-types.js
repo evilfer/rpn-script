@@ -1,5 +1,6 @@
 const TYPE_PARENT = {
-    'number': 'any'
+    'number': 'any',
+    'wrapped': 'any'
 };
 
 function isDescendent(typeA, typeB) {
@@ -14,6 +15,14 @@ export function anyType() {
 
 export function numberType() {
     return {type: 'number'};
+}
+
+export function wrappedType({argIn = [], argOut = []} = {}) {
+    return {
+        type: 'wrapped',
+        argIn,
+        argOut
+    };
 }
 
 export function typeMatch(typeA, typeB) {

@@ -81,6 +81,89 @@ describe('identifyTypes', () => {
         expect(argOut).to.deep.eql([{type: 'number'}]);
     });
 
+    describe('with wrapped expressions', () => {
+        it('should identify type of wrapped expressions in stack', () => {
+            let {ordered: [{argIn, argOut, wrapped: [w1]}]} = build("1 (+)", ops);
+
+            expect(w1.argIn).to.deep.eql([{type: 'number'}, {type: 'number'}]);
+            expect(w1.argOut).to.deep.eql([{type: 'number'}]);
+
+            expect(argIn).to.deep.eql([]);
+            expect(argOut).to.eql([{
+                type: 'number'
+            }, {
+                type: 'wrapped',
+                argIn: [{type: 'number'}, {type: 'number'}],
+                argOut: [{type: 'number'}]
+            }]);
+        });
+
+        it('should apply wrapped types by ref', () => {
+            let {ordered: [a, b]} = build(`
+            a = 1 (+)
+            1 a
+            `, ops);
+
+            expect(a.argIn).to.deep.eql([]);
+            expect(a.argOut).to.eql([{
+                type: 'number'
+            }, {
+                type: 'wrapped',
+                argIn: [{type: 'number'}, {type: 'number'}],
+                argOut: [{type: 'number'}]
+            }]);
+
+            expect(b.argIn).to.deep.eql([]);
+            expect(b.argOut).to.eql([{
+                type: 'number'
+            }, {
+                type: 'number'
+            }, {
+                type: 'wrapped',
+                argIn: [{type: 'number'}, {type: 'number'}],
+                argOut: [{type: 'number'}]
+            }]);
+        });
+
+
+        it('should identify type of nested wrapped expressions in stack', () => {
+            let {ordered: [{argIn, argOut, wrapped: [w2, w1]}]} = build("1 (+(-))", ops);
+
+            expect(w1.argIn).to.deep.eql([{type: 'number'}, {type: 'number'}]);
+            expect(w1.argOut).to.deep.eql([{type: 'number'}, {
+                type: 'wrapped',
+                argIn: [{type: 'number'}, {type: 'number'}],
+                argOut: [{type: 'number'}]
+            }]);
+
+            expect(w2.argIn).to.deep.eql([{type: 'number'}, {type: 'number'}]);
+            expect(w2.argOut).to.deep.eql([{type: 'number'}]);
+
+            expect(argIn).to.deep.eql([]);
+            expect(argOut).to.eql([{
+                type: 'number'
+            }, {
+                type: 'wrapped',
+                argIn: [{type: 'number'}, {type: 'number'}],
+                argOut: [{type: 'number'}, {
+                    type: 'wrapped',
+                    argIn: [{type: 'number'}, {type: 'number'}],
+                    argOut: [{type: 'number'}]
+                }]
+            }]);
+        });
+
+        describe('and unwrap operator', () => {
+            it('should identify type of wrapped expressions in stack', () => {
+                let {ordered: [{rhs, argIn, argOut, wrapped: [w1]}]} = build("1 (+) )(", ops);
+
+                expect(w1.argIn).to.deep.eql([{type: 'number'}, {type: 'number'}]);
+                expect(w1.argOut).to.deep.eql([{type: 'number'}]);
+
+                expect(argIn).to.deep.eql([{type: 'number'}]);
+                expect(argOut).to.eql([{type: 'number'}]);
+            });
+        });
+    });
+
 });
-
-

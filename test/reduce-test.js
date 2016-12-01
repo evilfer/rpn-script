@@ -54,6 +54,27 @@ describe('reduce', () => {
         expect(argOut).to.deep.eql([{type: 'number'}]);
     });
 
+    describe('with wrapped expressions', () => {
+        it('should not evaluate wrapped expressions', () => {
+            let {ordered: [{reduced}]} = build("1 1 (+)", ops);
+            expect(reduced).to.be.false;
+        });
+
+        it('should evaluate expressions on unwrap', () => {
+            let {ordered: [{reduced}]} = build("1 1 (+) )(", ops);
+            expect(reduced).to.be.true;
+        });
+
+        it('should evaluate expressions on unwrap by ref', () => {
+            let {ordered: [a, b]} = build(`
+            a = 1 1 (+)
+            a )(
+            `, ops);
+            expect(a.reduced).to.be.false;
+            expect(b.reduced).to.be.true;
+        });
+    });
+
 });
 
 

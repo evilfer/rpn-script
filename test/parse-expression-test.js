@@ -1,5 +1,6 @@
 import {expect} from 'chai';
 import parseExpression from "../src/maths/parse-expression";
+import {MISSING_NAME, REPEAT_DEFINE, WRAP_IN_NAME, MISMATCHED_WRAP} from "../src/maths/error-types";
 
 describe('parseExpression', () => {
 
@@ -62,9 +63,22 @@ describe('parseExpression', () => {
         ]);
     });
 
+    it('should identify missing name', () => {
+        expect(parseExpression(" = 1 2 + x *").errors).to.deep.eql([{type: MISSING_NAME}]);
+        expect(parseExpression("= 1 2 + x *").errors).to.deep.eql([{type: MISSING_NAME}]);
+    });
+
+    it('should identify repeated =', () => {
+        expect(parseExpression(" = 1 = 2 + x *").errors).to.deep.eql([{type: MISSING_NAME}, {type: REPEAT_DEFINE}]);
+        expect(parseExpression("a = = 1 2 + x *").errors).to.deep.eql([{type: REPEAT_DEFINE}]);
+        expect(parseExpression("a = ==").errors).to.equal(false);
+        expect(parseExpression("== = a").errors).to.equal(false);
+        expect(parseExpression("1 2 ==").errors).to.equal(false);
+    });
+
     describe('wrapped expressions', () => {
-        it('should identify token types', () => {
-            let {tokens} = parseExpression("x a = 1 2 + x (10 *)");
+        it('should identify token types (with errors)', () => {
+            let {tokens} = parseExpression("x a = 1 2 + x (10 *) (");
             expect(tokens).to.deep.eql([
                 {type: 'arg', name: 'x', code: 'x'},
                 {type: 'name', code: 'a'},
@@ -76,11 +90,121 @@ describe('parseExpression', () => {
                 {type: 'wo', code: '('},
                 {type: 'number', value: 10, code: '10'},
                 {type: 'expr', name: '*', code: '*'},
-                {type: 'wc', code: ')'}
+                {type: 'wc', code: ')'},
+                {type: 'wo', code: '('}
             ]);
+        });
+
+        it('should mark wrapping related operators before "=" as errors', () => {
+            expect(parseExpression(")( a = 1 2 + x *").errors).to.deep.eql([{type: WRAP_IN_NAME}]);
+            expect(parseExpression("( a = 1 2 + x *").errors).to.deep.eql([{type: WRAP_IN_NAME}]);
+            expect(parseExpression(") a = 1 2 + x *").errors).to.deep.eql([{type: WRAP_IN_NAME}]);
+        });
+
+        it('should identify mismatched wrappers', () => {
+            expect(parseExpression("(1 2 (+) x *)").errors).to.equal(false);
+            expect(parseExpression("(1 2 (+) x *").errors).to.deep.equal([{type: MISMATCHED_WRAP}]);
+            expect(parseExpression("1 2 (+) x *)").errors).to.deep.equal([{type: MISMATCHED_WRAP}]);
+            expect(parseExpression("(1 2 +) (x *)").errors).to.equal(false);
+            expect(parseExpression("(1 2 +) + ) x (*").errors).to.deep.equal([{type: MISMATCHED_WRAP}]);
+        });
+
+        it('should wrap rhs tokens', () => {
+            let {rhs, wrapped} = parseExpression("1 (10 *)");
+            expect(rhs).deep.eql([{
+                code: "1",
+                type: "number",
+                value: 1
+            }, {
+                type: 'wrapped',
+                index: 0,
+                expr: {
+                    rhs: [{
+                        code: "10",
+                        type: "number",
+                        value: 10
+                    }, {
+                        code: "*",
+                        type: "expr",
+                        name: "*"
+                    }]
+                }
+            }]);
+
+            expect(wrapped).to.deep.eql([{
+                rhs: [{
+                    code: "10",
+                    type: "number",
+                    value: 10
+                }, {
+                    code: "*",
+                    type: "expr",
+                    name: "*"
+                }]
+            }]);
+        });
+
+
+        it('should wrap nested rhs tokens', () => {
+            let {rhs, wrapped} = parseExpression("1 (10 (+) *)");
+            expect(rhs).deep.eql([{
+                code: "1",
+                type: "number",
+                value: 1
+            }, {
+                type: 'wrapped',
+                index: 1,
+                expr: {
+                    rhs: [{
+                        code: "10",
+                        type: "number",
+                        value: 10
+                    }, {
+                        type: "wrapped",
+                        index: 0,
+                        expr: {
+                            rhs: [{
+                                code: "+",
+                                type: "expr",
+                                name: "+"
+                            }]
+                        }
+                    }, {
+                        code: "*",
+                        type: "expr",
+                        name: "*"
+                    }]
+                }
+            }]);
+
+            expect(wrapped).to.deep.eql([{
+                rhs: [{
+                    code: "+",
+                    type: "expr",
+                    name: "+"
+                }]
+            }, {
+                rhs: [{
+                    code: "10",
+                    type: "number",
+                    value: 10
+                }, {
+                    type: "wrapped",
+                    index: 0,
+                    expr: {
+                        rhs: [{
+                            code: "+",
+                            type: "expr",
+                            name: "+"
+                        }]
+                    }
+                }, {
+                    code: "*",
+                    type: "expr",
+                    name: "*"
+                }]
+            }]);
         });
     });
 
 });
-
-

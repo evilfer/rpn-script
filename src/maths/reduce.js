@@ -7,12 +7,22 @@ function reduceToken(scope, expr, stack, localNamespace, token) {
         case 'number':
             stack.push(token.value);
             return true;
+        case 'wrapped':
+            stack.push(token);
+            return true;
+            break;
         case 'arg':
             if (typeof localNamespace[token.name] === 'undefined') {
                 return false;
             }
             stack.push(localNamespace[token.name]);
             return true;
+        case 'unwrap':
+            if (stack.length === 0) {
+                return false;
+            }
+            let stackedExpr = stack.pop();
+            return reduceTokens(scope, expr, stack, localNamespace, stackedExpr.expr.rhs);
         case 'expr':
             let refd = namespace[token.name] || globalNamespace[token.name];
 
@@ -36,7 +46,7 @@ function reduceToken(scope, expr, stack, localNamespace, token) {
 
             if (refd.rhs) {
                 let refdLocalNamespace = array2obj(refd.args, (argName, i) => [argName, args[i]]);
-                return reduceTokens(scope, expr, stack, refdLocalNamespace, refd.rhs);
+                return reduceTokens(scope, refd, stack, refdLocalNamespace, refd.rhs);
             }
 
             return false;

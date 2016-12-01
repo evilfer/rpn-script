@@ -1,9 +1,10 @@
 export function addError(errors, error) {
+    let errorObj = typeof error === 'string' ? {type: error} : error;
     if (!errors) {
-        return [error];
+        return [errorObj];
     }
 
-    errors.push(error);
+    errors.push(errorObj);
     return errors;
 }
 
