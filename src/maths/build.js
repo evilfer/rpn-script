@@ -1,6 +1,5 @@
 import parseCode from "./parse-code";
 import checkDependencies from "./check-dependencies";
-import identifyTypes from "./identify-types";
-import reduce from "./reduce";
+import evaluate from "./evaluate";
 
-export default (code, namespace) => reduce(identifyTypes(checkDependencies(parseCode(code, namespace))))
+export default (code, namespace) => evaluate(checkDependencies(parseCode(code, namespace)))

@@ -17,6 +17,7 @@
     "mocha": "^3.2.0"
   },
   "dependencies": {
+    "clone": "^2.1.0",
     "extend": "^3.0.0"
   }
 }

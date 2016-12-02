@@ -53,7 +53,7 @@ function prepareRhs(rhs, wrappedList) {
         prepareRhs(wrappedTokens, wrappedList);
         let index = wrappedList.length;
         let wrappedExpr = {rhs: wrappedTokens};
-        wrappedList.push({rhs: wrappedTokens});
+        wrappedList.push(wrappedExpr);
         rhs.splice(start, 0, {type: 'wrapped', index, expr: wrappedExpr});
     }
 }

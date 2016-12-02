@@ -17,11 +17,10 @@ export function numberType() {
     return {type: 'number'};
 }
 
-export function wrappedType({argIn = [], argOut = []} = {}) {
+export function wrappedType(expr = null) {
     return {
         type: 'wrapped',
-        argIn,
-        argOut
+        expr
     };
 }
 
@@ -32,4 +31,8 @@ export function typeMatch(typeA, typeB) {
 
     typeA.type = typeB.type;
     return true;
+}
+
+export function isOfType({type}, expected) {
+    return type === expected || TYPE_PARENT[type] === expected;
 }

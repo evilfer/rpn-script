@@ -8,6 +8,6 @@ export function addError(errors, error) {
     return errors;
 }
 
-export function addErrorContainer(container, errors) {
-    container.errors = addError(container.errors, errors);
+export function addErrorContainer(container, error) {
+    container.errors = addError(container.errors, error);
 }
