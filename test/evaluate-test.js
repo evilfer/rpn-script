@@ -220,6 +220,36 @@ describe('evaluate', () => {
             }
             ]);
         });
+
+        it('should indicate that expected wrapped expression cannot be inferred', () => {
+            let {ordered: [a]} = build(`
+             uwa1 = )( 1 +
+        `, ops);
+
+            expect(a.unknown).to.be.true;
+        });
+
+        it('should infer types of wrapped expression', () => {
+            let {ordered: [a]} = build(`
+             uwa1 = (+) )(
+        `, ops);
+
+            expect(a.unknown).not.to.be.true;
+
+            expect(a.input).to.deep.eql([{"type": "number"}, {"type": "number"}]);
+            expect(a.output).to.deep.eql([{"type": "number"}]);
+        });
+
+        it('should infer types of wrapped expression with named args', () => {
+            let {ordered: [a]} = build(`
+             x y uwa1 = x y (+) )(
+        `, ops);
+
+            expect(a.unknown).not.to.be.true;
+
+            expect(a.input).to.deep.eql([{"type": "number"}, {"type": "number"}]);
+            expect(a.output).to.deep.eql([{"type": "number"}]);
+        });
     });
 
 

@@ -1,7 +1,6 @@
-import extend from "extend";
 import objMap from "../../utils/obj-map";
 import range from "../../utils/range";
-import {numberType, isOfType} from "../../maths/stack-types";
+import {numberType} from "../../maths/stack-types";
 import {addErrorContainer} from "../add-error";
 import {BAD_TYPE} from "../error-types";
 
@@ -9,7 +8,18 @@ import {BAD_TYPE} from "../error-types";
 const typeArray = n => range(n).map(numberType);
 
 const typeCheck = (args, errorContainer) => {
-    let ok = args.every(arg => isOfType(arg, 'number'));
+    let ok = args.every(arg => {
+        if (arg.type === 'number') {
+            return true;
+        }
+
+        if (arg.type === 'any' && typeof arg.value === 'undefined') {
+            arg.type = 'number';
+            return true;
+        }
+
+        return false;
+    });
     if (!ok) {
         addErrorContainer(errorContainer, BAD_TYPE);
     }
@@ -19,8 +29,6 @@ const typeCheck = (args, errorContainer) => {
 const valueCheck = args => args.every(arg => typeof arg.value !== 'undefined');
 
 function numberOp(op, name) {
-
-
     let tx = (args, errorContainer) => {
         return [
             typeCheck(args, errorContainer) && valueCheck(args) ?

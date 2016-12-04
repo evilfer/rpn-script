@@ -14,7 +14,7 @@ function applyNativeOperator(scope, expr, op) {
         args.unshift(arg);
     }
 
-    let output = op.tx(args);
+    let output = op.tx(args, expr);
     output.forEach(item => expr.output.push(item));
     return true;
 }
@@ -62,8 +62,8 @@ function applyOperator(scope, expr, name) {
 function evaluateUnwrap(scope, expr) {
     if (expr.output.length === 0) {
         expr.input.unshift(wrappedType())
-        expr.output.push(anyType());
-        return true;
+        expr.unknown = true;
+        return false;
     }
 
     let operand = expr.output.pop();

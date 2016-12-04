@@ -36,3 +36,6 @@ export function typeMatch(typeA, typeB) {
 export function isOfType({type}, expected) {
     return type === expected || TYPE_PARENT[type] === expected;
 }
+
+
+
