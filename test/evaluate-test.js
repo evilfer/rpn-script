@@ -129,24 +129,22 @@ describe('evaluate', () => {
 
             expect(a.input).to.deep.eql([]);
             expect(a.output).to.deep.eql([{
-                "expr": {
-                    "callNamespace": {},
-                    "input": [],
-                    "output": [
-                        {
-                            "type": "number",
-                            "value": 1
-                        }
-                    ],
-                    "rhs": [
-                        {
-                            "code": "1",
-                            "type": "number",
-                            "value": 1
-                        }
-                    ]
-                },
-                "type": "wrapped"
+                "type": "wrapped",
+                "callNamespace": {},
+                "input": [],
+                "output": [
+                    {
+                        "type": "number",
+                        "value": 1
+                    }
+                ],
+                "rhs": [
+                    {
+                        "code": "1",
+                        "type": "number",
+                        "value": 1
+                    }
+                ]
             }]);
         });
 
@@ -169,12 +167,32 @@ describe('evaluate', () => {
             expect(a.input).to.deep.eql([]);
             expect(a.output).to.deep.eql([{
                 "type": "wrapped",
-                "expr": {
+                "callNamespace": {},
+                "input": [],
+                "output": [{
+                    "type": "wrapped",
                     "callNamespace": {},
                     "input": [],
-                    "output": [{
+                    "output": [
+                        {
+                            "type": "number",
+                            "value": 1
+                        }
+                    ],
+                    "rhs": [
+                        {
+                            "code": "1",
+                            "type": "number",
+                            "value": 1
+                        }
+                    ]
+                }
+                ],
+                "rhs": [
+                    {
                         "type": "wrapped",
-                        "expr": {
+                        "index": 0,
+                        expr: {
                             "callNamespace": {},
                             "input": [],
                             "output": [
@@ -192,31 +210,7 @@ describe('evaluate', () => {
                             ]
                         }
                     }
-                    ],
-                    "rhs": [
-                        {
-                            "type": "wrapped",
-                            "expr": {
-                                "callNamespace": {},
-                                "input": [],
-                                "output": [
-                                    {
-                                        "type": "number",
-                                        "value": 1
-                                    }
-                                ],
-                                "rhs": [
-                                    {
-                                        "code": "1",
-                                        "type": "number",
-                                        "value": 1
-                                    }
-                                ]
-                            },
-                            "index": 0
-                        }
-                    ]
-                }
+                ]
             }
             ]);
         });
@@ -250,154 +244,87 @@ describe('evaluate', () => {
             expect(a.input).to.deep.eql([{"type": "number"}, {"type": "number"}]);
             expect(a.output).to.deep.eql([{"type": "number"}]);
         });
+
+        it('should evaluate fixed-count unwrap', () => {
+            let {ordered: [{unknown, errors, input, output}]} = build(")2:1(");
+            expect(errors).to.be.false;
+            expect(unknown).not.to.be.true;
+            expect(input).to.deep.equal([
+                {type: 'any'},
+                {type: 'any'},
+                {
+                    type: 'wrapped',
+                    input: [{type: 'any'}, {type: 'any'}],
+                    output: [{type: 'any'}]
+                }]);
+            expect(output).to.deep.equal([{type: 'any'}]);
+        });
+
+        it('should evaluate fixed-count unwrap (2)', () => {
+            let {ordered: [{unknown, errors, input, output}]} = build(")0:2(", ops);
+            expect(errors).to.be.false;
+            expect(unknown).not.to.be.true;
+            expect(input).to.deep.equal([{
+                type: 'wrapped',
+                input: [],
+                output: [{type: 'any'}, {type: 'any'}]
+            }]);
+            expect(output).to.deep.equal([{type: 'any'}, {type: 'any'}]);
+        });
+
+        it('should evaluate fixed-count unwrap (3)', () => {
+            let {ordered: [{unknown, errors, input, output}]} = build(")0:2( +", ops);
+            expect(errors).to.be.false;
+            expect(unknown).not.to.be.true;
+            expect(input).to.deep.equal([{
+                type: 'wrapped',
+                input: [],
+                output: [{type: 'number'}, {type: 'number'}]
+            }]);
+            expect(output).to.deep.equal([{type: 'number'}]);
+        });
+
+        it('should evaluate fixed-count unwrap (4)', () => {
+            let {ordered: [{unknown, errors, input, output}]} = build(")0:2( )0:0(", ops);
+            expect(errors).to.be.false;
+            expect(unknown).not.to.be.true;
+            expect(input).to.deep.equal([{
+                type: 'wrapped',
+                input: [],
+                output: [{type: 'any'}, {
+                    type: 'wrapped',
+                    input: [],
+                    output: []
+                }]
+            }]);
+            expect(output).to.deep.equal([{type: 'any'}]);
+        });
+
+        it('should evaluate fixed-count unwrap (5)', () => {
+            let {ordered: [{unknown, errors, input, output}]} = build(")0:2( )1:0(", ops);
+            expect(errors).to.be.false;
+            expect(unknown).not.to.be.true;
+            expect(input).to.deep.equal([{
+                type: 'wrapped',
+                input: [],
+                output: [{type: 'any'}, {
+                    type: 'wrapped',
+                    input: [{type: 'any'}],
+                    output: []
+                }]
+            }]);
+            expect(output).to.deep.equal([]);
+        });
+
+        it('should evaluate fixed-count unwrap (6)', () => {
+            let {ordered: [drop1, {unknown, errors, input, output}]} = build(`
+                x drop1 =
+                (1 (drop1)) )0:2( )1:0(
+            `, ops);
+            expect(errors).to.be.false;
+            expect(unknown).not.to.be.true;
+            expect(input).to.deep.equal([]);
+            expect(output).to.deep.equal([]);
+        });
     });
-
-
-    /*
-
-     it('should identify type of expression with builtin op', () => {
-     let {ordered: [a]} = build("1 1 +", ops);
-
-     expect(a.argPop).to.equal(0);
-     expect(a.argIn).to.deep.eql([]);
-     expect(a.argOut).to.deep.eql([{type: 'number'}]);
-     });
-
-     it('should identify type of function expressions', () => {
-     let {ordered: [a]} = build("1 +", ops);
-
-     expect(a.argPop).to.equal(0);
-     expect(a.argIn).to.deep.eql([{type: 'number'}]);
-     expect(a.argOut).to.deep.eql([{type: 'number'}]);
-     });
-
-
-     it('should identify type of nested expressions', () => {
-     let {ordered: [add1, a]} = build("add1 = 1 +\na = 1 add1", ops);
-
-     expect(add1.argPop).to.equal(0);
-     expect(add1.argIn).to.deep.eql([{type: 'number'}]);
-     expect(add1.argOut).to.deep.eql([{type: 'number'}]);
-     expect(a.argPop).to.equal(0);
-     expect(a.argIn).to.deep.eql([]);
-     expect(a.argOut).to.deep.eql([{type: 'number'}]);
-     });
-
-     it('should add generic type of declared args', () => {
-     let {ordered: [{name, errors, argPop, argIn, argOut}]} = build("x y drop2 =", ops);
-
-     expect(name).to.equal('drop2');
-     expect(errors).to.equal(false);
-     expect(argPop).to.equal(2);
-     expect(argIn).to.deep.eql([{type: 'any'}, {type: 'any'}]);
-     expect(argOut).to.deep.eql([]);
-     });
-
-     it('should identify type of declared args', () => {
-     let {ordered: [{name, errors, argPop, argIn, argOut}]} = build("x y drop2 = y 1 +", ops);
-
-     expect(name).to.equal('drop2');
-     expect(errors).to.equal(false);
-     expect(argPop).to.equal(2);
-     expect(argIn).to.deep.eql([{type: 'any'}, {type: 'number'}]);
-     expect(argOut).to.deep.eql([{type: 'number'}]);
-     });
-
-     describe('with wrapped expressions', () => {
-     it('should identify type of wrapped expressions in stack', () => {
-     let {ordered: [{argIn, argOut, wrapped: [w1]}]} = build("1 (+)", ops);
-
-     expect(w1.argIn).to.deep.eql([{type: 'number'}, {type: 'number'}]);
-     expect(w1.argOut).to.deep.eql([{type: 'number'}]);
-
-     expect(argIn).to.deep.eql([]);
-     expect(argOut).to.eql([{
-     type: 'number'
-     }, {
-     type: 'wrapped',
-     argIn: [{type: 'number'}, {type: 'number'}],
-     argOut: [{type: 'number'}]
-     }]);
-     });
-
-     it('should apply wrapped types by ref', () => {
-     let {ordered: [a, b]} = build(`
-     a = 1 (+)
-     1 a
-     `, ops);
-
-     expect(a.argIn).to.deep.eql([]);
-     expect(a.argOut).to.eql([{
-     type: 'number'
-     }, {
-     type: 'wrapped',
-     argIn: [{type: 'number'}, {type: 'number'}],
-     argOut: [{type: 'number'}]
-     }]);
-
-     expect(b.argIn).to.deep.eql([]);
-     expect(b.argOut).to.eql([{
-     type: 'number'
-     }, {
-     type: 'number'
-     }, {
-     type: 'wrapped',
-     argIn: [{type: 'number'}, {type: 'number'}],
-     argOut: [{type: 'number'}]
-     }]);
-     });
-
-
-     it('should identify type of nested wrapped expressions in stack', () => {
-     let {ordered: [{argIn, argOut, wrapped: [w2, w1]}]} = build("1 (+(-))", ops);
-
-     expect(w1.argIn).to.deep.eql([{type: 'number'}, {type: 'number'}]);
-     expect(w1.argOut).to.deep.eql([{type: 'number'}, {
-     type: 'wrapped',
-     argIn: [{type: 'number'}, {type: 'number'}],
-     argOut: [{type: 'number'}]
-     }]);
-
-     expect(w2.argIn).to.deep.eql([{type: 'number'}, {type: 'number'}]);
-     expect(w2.argOut).to.deep.eql([{type: 'number'}]);
-
-     expect(argIn).to.deep.eql([]);
-     expect(argOut).to.eql([{
-     type: 'number'
-     }, {
-     type: 'wrapped',
-     argIn: [{type: 'number'}, {type: 'number'}],
-     argOut: [{type: 'number'}, {
-     type: 'wrapped',
-     argIn: [{type: 'number'}, {type: 'number'}],
-     argOut: [{type: 'number'}]
-     }]
-     }]);
-     });
-
-     it('should identify types reorganized through named args', () => {
-     let {ordered: [, a]} = build(`
-     x y flip = y x
-     a = 1 2 flip
-     `, ops);
-
-     console.log(a);
-     expect (true).to.be.false;
-     });
-
-     describe('and unwrap operator', () => {
-     it('should identify type of wrapped expressions in stack', () => {
-     let {ordered: [{rhs, argIn, argOut, wrapped: [w1]}]} = build("1 (+) )(", ops);
-
-     expect(w1.argIn).to.deep.eql([{type: 'number'}, {type: 'number'}]);
-     expect(w1.argOut).to.deep.eql([{type: 'number'}]);
-
-     expect(argIn).to.deep.eql([{type: 'number'}]);
-     expect(argOut).to.eql([{type: 'number'}]);
-     });
-     });
-
-     });*/
-
-})
-;
+});

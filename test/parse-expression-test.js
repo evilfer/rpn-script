@@ -99,6 +99,7 @@ describe('parseExpression', () => {
             expect(parseExpression(")( a = 1 2 + x *").errors).to.deep.eql([{type: WRAP_IN_NAME}]);
             expect(parseExpression("( a = 1 2 + x *").errors).to.deep.eql([{type: WRAP_IN_NAME}]);
             expect(parseExpression(") a = 1 2 + x *").errors).to.deep.eql([{type: WRAP_IN_NAME}]);
+            expect(parseExpression("() a = 1 2 + x *").errors).to.deep.eql([{type: WRAP_IN_NAME}]);
         });
 
         it('should identify mismatched wrappers', () => {
@@ -205,6 +206,19 @@ describe('parseExpression', () => {
                 }]
             }]);
         });
+
+        it('should identify unwrap', () => {
+            let {rhs, errors} = parseExpression(")(");
+            expect(errors).to.equal(false);
+            expect(rhs).to.deep.equal([{type: 'unwrap', code: ')('}]);
+        });
+
+        it('should identify fixed-count unwrap', () => {
+            let {rhs, errors} = parseExpression(")2:1(");
+            expect(errors).to.equal(false);
+            expect(rhs).to.deep.equal([{type: 'unwrap', code: ')2:1(', input: 2, output: 1}]);
+        });
+
     });
 
 });

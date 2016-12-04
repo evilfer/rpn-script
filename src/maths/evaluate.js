@@ -59,35 +59,50 @@ function applyOperator(scope, expr, name) {
     }
 }
 
-function evaluateUnwrap(scope, expr) {
+function evaluateUnwrap(scope, expr, {input = -1, output = -1}) {
+    let operand;
+
     if (expr.output.length === 0) {
-        expr.input.unshift(wrappedType())
-        expr.unknown = true;
+        operand = wrappedType();
+        expr.input.unshift(operand);
+    } else {
+        operand = expr.output.pop();
+    }
+
+    if (operand.type === 'any') {
+        operand.type = 'wrapped';
+    }
+
+    if (operand.type !== 'wrapped') {
+        addErrorContainer(expr, BAD_TYPE);
         return false;
     }
 
-    let operand = expr.output.pop();
-
-    switch (operand.type) {
-        case 'any':
-            operand.type = 'wrapped';
-            operand.expr = null;
-            expr.output.push(anyType());
-            return true;
-        case 'wrapped':
-            if (operand.expr) {
-                operand.expr.rhs.every(evaluateOperator.bind(null, scope, expr, operand.expr));
-            } else {
-                expr.output.push(anyType());
-            }
-
-            return true;
-        default:
-            addErrorContainer(expr, BAD_TYPE);
+    if (!operand.input) {
+        if (input < 0) {
+            expr.unknown = true;
             return false;
+        }
+
+        operand.input = range(input).map(() => anyType());
+        operand.output = range(output).map(() => anyType());
     }
 
+    if (operand.rhs) {
+        operand.rhs.every(evaluateOperator.bind(null, scope, expr, operand));
+    } else {
+        operand.input.reverse().forEach(item => {
+            if (expr.output.length > 0) {
+                expr.output.pop();
+            } else {
+                expr.input.unshift(item);
+            }
+        });
 
+        operand.output.forEach(item => expr.output.push(item));
+    }
+
+    return true;
 }
 
 function evaluateOperator(scope, expr, opOwner, token) {
@@ -102,16 +117,15 @@ function evaluateOperator(scope, expr, opOwner, token) {
             return true;
         case 'wrapped':
             expr.output.push({
-                type: token.type, expr: {
-                    callNamespace: token.expr.callNamespace,
-                    rhs: clone(token.expr.rhs),
-                    input: clone(token.expr.input),
-                    output: clone(token.expr.output)
-                }
+                type: token.type,
+                callNamespace: token.expr.callNamespace,
+                rhs: clone(token.expr.rhs),
+                input: clone(token.expr.input),
+                output: clone(token.expr.output)
             });
             return true;
         case 'unwrap':
-            return evaluateUnwrap(scope, expr);
+            return evaluateUnwrap(scope, expr, token);
     }
 }
 

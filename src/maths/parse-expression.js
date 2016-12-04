@@ -106,8 +106,14 @@ export default function parseExpression(code) {
             return {type: 'wc', code: token};
         }
 
-        if (token === ')(') {
-            return {type: 'unwrap', code: token};
+        let unwrapMatch = token.match(/\)(([0-9]+):([0-9]+))?\($/);
+        if (unwrapMatch) {
+            let to = {type: 'unwrap', code: token};
+            if (unwrapMatch[1]) {
+                to.input = parseInt(unwrapMatch[2]);
+                to.output = parseInt(unwrapMatch[3]);
+            }
+            return to;
         }
 
         let value = parseFloat(token);

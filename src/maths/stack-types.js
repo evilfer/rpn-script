@@ -18,10 +18,7 @@ export function numberType() {
 }
 
 export function wrappedType(expr = null) {
-    return {
-        type: 'wrapped',
-        expr
-    };
+    return null ? {type: 'wrapped', expr} : {type: 'wrapped'};
 }
 
 export function typeMatch(typeA, typeB) {
