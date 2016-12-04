@@ -139,6 +139,8 @@ function evaluateExpression(scope, expr) {
 }
 
 export default function evaluate(scope) {
-    scope.ordered.forEach(evaluateExpression.bind(null, scope));
+    scope.ordered
+        .filter(expr => !expr.errors)
+        .forEach(evaluateExpression.bind(null, scope));
     return scope;
 }
