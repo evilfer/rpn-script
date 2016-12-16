@@ -317,6 +317,27 @@ describe('evaluate', () => {
         });
 
         it('should evaluate fixed-count unwrap (6)', () => {
+            let {ordered: [{unknown, errors, input, output}]} = build(")0:2( )1:1( +", ops);
+            expect(errors).to.be.false;
+            expect(unknown).not.to.be.true;
+            expect(input).to.deep.equal([
+                {type: 'number'},
+                {
+                    type: 'wrapped',
+                    input: [],
+                    output: [
+                        {type: 'any'},
+                        {
+                            type: 'wrapped',
+                            input: [{type: 'any'}],
+                            output: [{type: 'number'}]
+                        }
+                    ]
+                }]);
+            expect(output).to.deep.equal([{type: 'number'}]);
+        });
+
+        it('should evaluate fixed-count unwrap (7)', () => {
             let {ordered: [drop1, {unknown, errors, input, output}]} = build(`
                 x drop1 =
                 (1 (drop1)) )0:2( )1:0(
@@ -325,6 +346,18 @@ describe('evaluate', () => {
             expect(unknown).not.to.be.true;
             expect(input).to.deep.equal([]);
             expect(output).to.deep.equal([]);
+        });
+    });
+
+    describe('error management', () => {
+        it('should detect error on numeric ops', () => {
+            let {namespace: {x, y}} = build(`
+                x = 1 1 +
+                y = (1) 1 +
+            `, ops);
+
+            expect(x.errors).to.be.false;
+            expect(y.errors).to.deep.eql([{type: 'BAD_TYPE'}]);
         });
     });
 });
