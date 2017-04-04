@@ -1,7 +1,7 @@
 import {expect} from 'chai';
-import parseCode from "../src/maths/parse-code";
-import checkDependencies from "../src/maths/check-dependencies";
-import {UNKNOWN_VAR, CIRCULAR_DEP, DEPENDENCY_ERROR} from "../src/maths/error-types";
+import parseCode from "../src/parse-code";
+import checkDependencies from "../src/check-dependencies";
+import {UNKNOWN_VAR, CIRCULAR_DEP, DEPENDENCY_ERROR} from "../src/error-types";
 
 describe('checkDependencies', () => {
 

@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import splitTokens from "../src/maths/split-tokens";
+import splitTokens from "../src/split-tokens";
 
 describe('splitTokens', () => {
 
@@ -12,7 +12,8 @@ describe('splitTokens', () => {
         'a = 1': ['a', '=', '1'],
         '  a   =   1  ': ['a', '=', '1'],
         '(a)': ['(', 'a', ')'],
-        '(a (b))': ['(', 'a', '(', 'b', ')', ')']
+        '(a (b))': ['(', 'a', '(', 'b', ')', ')'],
+        '[a, (b)]': ['[', 'a', ',', '(', 'b', ')', ']']
     };
 
     Object.keys(pairs).forEach(code => {

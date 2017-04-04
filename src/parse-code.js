@@ -1,4 +1,4 @@
-import array2obj from "../utils/array-2-obj";
+import {array2obj} from "./obj-map";
 import parseExpression from "./parse-expression";
 import {addErrorContainer} from "./add-error";
 import {REDEFINE_VAR} from "./error-types";

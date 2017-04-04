@@ -1,6 +1,6 @@
 import {expect} from 'chai';
-import parseExpression from "../src/maths/parse-expression";
-import {MISSING_NAME, REPEAT_DEFINE, WRAP_IN_NAME, MISMATCHED_WRAP} from "../src/maths/error-types";
+import parseExpression from "../src/parse-expression";
+import {MISSING_NAME, REPEAT_DEFINE, WRAP_IN_NAME, MISMATCHED_WRAP, BAD_NAME} from "../src/error-types";
 
 describe('parseExpression', () => {
 
@@ -63,6 +63,7 @@ describe('parseExpression', () => {
         ]);
     });
 
+
     it('should identify missing name', () => {
         expect(parseExpression(" = 1 2 + x *").errors).to.deep.eql([{type: MISSING_NAME}]);
         expect(parseExpression("= 1 2 + x *").errors).to.deep.eql([{type: MISSING_NAME}]);
@@ -74,11 +75,15 @@ describe('parseExpression', () => {
         expect(parseExpression("a = ==").errors).to.equal(false);
         expect(parseExpression("== = a").errors).to.equal(false);
         expect(parseExpression("1 2 ==").errors).to.equal(false);
+        expect(parseExpression("1 2 = ==").errors).to.deep.eql([{type: BAD_NAME, name: '1'}, {
+            type: BAD_NAME,
+            name: '2'
+        }]);
     });
 
     describe('wrapped expressions', () => {
         it('should identify token types (with errors)', () => {
-            let {tokens} = parseExpression("x a = 1 2 + x (10 *) (");
+            let {tokens} = parseExpression("x a = 1 2 + x (10 *) [3,4] (");
             expect(tokens).to.deep.eql([
                 {type: 'arg', name: 'x', code: 'x'},
                 {type: 'name', code: 'a'},
@@ -91,15 +96,23 @@ describe('parseExpression', () => {
                 {type: 'number', value: 10, code: '10'},
                 {type: 'expr', name: '*', code: '*'},
                 {type: 'wc', code: ')'},
+                {type: 'ao', code: '['},
+                {type: 'number', code: '3', value: 3},
+                {type: 'as', code: ','},
+                {type: 'number', code: '4', value: 4},
+                {type: 'ac', code: ']'},
                 {type: 'wo', code: '('}
             ]);
         });
 
         it('should mark wrapping related operators before "=" as errors', () => {
-            expect(parseExpression(")( a = 1 2 + x *").errors).to.deep.eql([{type: WRAP_IN_NAME}]);
-            expect(parseExpression("( a = 1 2 + x *").errors).to.deep.eql([{type: WRAP_IN_NAME}]);
-            expect(parseExpression(") a = 1 2 + x *").errors).to.deep.eql([{type: WRAP_IN_NAME}]);
-            expect(parseExpression("() a = 1 2 + x *").errors).to.deep.eql([{type: WRAP_IN_NAME}]);
+            expect(parseExpression(")( a = 1 2 + x *").errors).to.deep.eql([{type: WRAP_IN_NAME, "name": ")("}]);
+            expect(parseExpression("( a = 1 2 + x *").errors).to.deep.eql([{type: WRAP_IN_NAME, "name": "("}]);
+            expect(parseExpression(") a = 1 2 + x *").errors).to.deep.eql([{type: WRAP_IN_NAME, "name": ")"}]);
+            expect(parseExpression("() a = 1 2 + x *").errors).to.deep.eql([{
+                type: WRAP_IN_NAME,
+                "name": "("
+            }, {type: WRAP_IN_NAME, "name": ")"}]);
         });
 
         it('should identify mismatched wrappers', () => {
@@ -111,28 +124,13 @@ describe('parseExpression', () => {
         });
 
         it('should wrap rhs tokens', () => {
-            let {rhs, wrapped} = parseExpression("1 (10 *)");
+            let {rhs} = parseExpression("1 (10 *)");
             expect(rhs).deep.eql([{
                 code: "1",
                 type: "number",
                 value: 1
             }, {
                 type: 'wrapped',
-                index: 0,
-                expr: {
-                    rhs: [{
-                        code: "10",
-                        type: "number",
-                        value: 10
-                    }, {
-                        code: "*",
-                        type: "expr",
-                        name: "*"
-                    }]
-                }
-            }]);
-
-            expect(wrapped).to.deep.eql([{
                 rhs: [{
                     code: "10",
                     type: "number",
@@ -147,58 +145,24 @@ describe('parseExpression', () => {
 
 
         it('should wrap nested rhs tokens', () => {
-            let {rhs, wrapped} = parseExpression("1 (10 (+) *)");
+            let {rhs} = parseExpression("1 (10 (+) *)");
             expect(rhs).deep.eql([{
                 code: "1",
                 type: "number",
                 value: 1
             }, {
                 type: 'wrapped',
-                index: 1,
-                expr: {
-                    rhs: [{
-                        code: "10",
-                        type: "number",
-                        value: 10
-                    }, {
-                        type: "wrapped",
-                        index: 0,
-                        expr: {
-                            rhs: [{
-                                code: "+",
-                                type: "expr",
-                                name: "+"
-                            }]
-                        }
-                    }, {
-                        code: "*",
-                        type: "expr",
-                        name: "*"
-                    }]
-                }
-            }]);
-
-            expect(wrapped).to.deep.eql([{
-                rhs: [{
-                    code: "+",
-                    type: "expr",
-                    name: "+"
-                }]
-            }, {
                 rhs: [{
                     code: "10",
                     type: "number",
                     value: 10
                 }, {
                     type: "wrapped",
-                    index: 0,
-                    expr: {
-                        rhs: [{
-                            code: "+",
-                            type: "expr",
-                            name: "+"
-                        }]
-                    }
+                    rhs: [{
+                        code: "+",
+                        type: "expr",
+                        name: "+"
+                    }]
                 }, {
                     code: "*",
                     type: "expr",
@@ -220,5 +184,45 @@ describe('parseExpression', () => {
         });
 
     });
+
+
+    describe('arrays', () => {
+        it('should identify token types', () => {
+            let {rhs} = parseExpression("a = [1, 2]");
+            expect(rhs).to.deep.eql([{
+                type: 'array',
+                items: [
+                    [{
+                        code: '1',
+                        type: 'number',
+                        value: 1
+                    }], [{
+                        code: '2',
+                        type: 'number',
+                        value: 2
+                    }]
+                ]
+            }]);
+        });
+
+        it('should identify args inside array', () => {
+            let {rhs} = parseExpression("x a = [x, 2]");
+            expect(rhs).to.deep.eql([{
+                type: "array",
+                items: [
+                    [{
+                        code: 'x',
+                        type: 'arg',
+                        name: 'x',
+                    }], [{
+                        code: '2',
+                        type: 'number',
+                        value: 2
+                    }]
+                ]
+            }]);
+        });
+    });
+
 
 });

@@ -2,7 +2,7 @@
 export default function splitTokens(code) {
     let tokens = [];
 
-    let regex = /\s+|(\)([0-9]+:[0-9]+)?\()\s*|([()])\s*|([^\s()]+)\s*/g;
+    let regex = /\s+|(\)([0-9]+:[0-9]+)?\()\s*|([()[\],])\s*|([^\s()[\],]+)\s*/g;
     let match;
 
     while (match = regex.exec(code)) {

@@ -1,6 +1,6 @@
 import {expect} from 'chai';
-import parseCode from "../src/maths/parse-code";
-import {REDEFINE_VAR} from "../src/maths/error-types";
+import parseCode from "../src/parse-code";
+import {REDEFINE_VAR} from "../src/error-types";
 
 
 describe('parseCode', () => {
