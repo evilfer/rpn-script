@@ -1,0 +1,72 @@
+
+
+1
+| number
+
+1 2
+| number number
+
++
+any any |
+number number |
+number number | number
+
+[]
+array(any)
+
+[1]
+array(number)
+
+[] 1 push
+array(any) number           require (array.item, number)
+array(number) number
+array(number)
+
+
+x duplicate = x x
+any |
+A:any | A:any A:any
+
+duplicate 1 +
+A:any |
+A:any | A:any A:any number
+A:number | A:number number
+
+}{
+error
+
+}1:1{
+wrap([A:any][B:any]) |
+A:any wrap([A:any][B:any]) | B:any
+
+
+
+}1:1{ 1 +
+
+wrap([A:any][B:any]) |
+A:any wrap([A:any][B:any]) | B:any
+A:any wrap([A:any][B:any]) | B:any number
+A:any wrap([A:any][B:number]) | B:number number
+A:any wrap([A:any][B:number]) | number
+
+
+1 arrayGet 1 +
+| number
+A:array(B:any) | A:array(B:any) number
+A:array(B:any) | B:any number
+A:array(B:number) | B:number number
+A:array(B:number) | number
+
+1 arrayPush
+| number
+A:array(B:any) | A:array(B:any) number
+A:array(B:number) | A:array(B:number) number
+A:array(B:number) | A:array(B:number)
+
+arrays: arrayGet, arrayPush, arraySet, arrayLen
+
+1 1 +
+
+1 +
+
+

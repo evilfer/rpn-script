@@ -1,9 +1,7 @@
 // @flow
-import {Error} from './errors';
 
-import type {OperatorList} from './operator';
-import type CodeToken from './code-token';
-import {createOperators} from './operator';
+import type {TokenType} from './code-token';
+import {createOperators} from './operators/create-operator';
 import parseTokens from '../parser/parse-tokens';
 import {
     splitTokens,
@@ -14,32 +12,35 @@ import {
     analyzeMatchingTokens,
     analyzeDependencies
 } from '../parser/analyze-tokens';
+import type {OperatorListType} from './base';
+import {TypeCheckContext} from './base';
 
 export class Expression {
     errors: boolean;
     name: ?string;
     code: string;
-    tokens: CodeToken[];
+    tokens: TokenType[];
     hash: string;
     namedArgs: string[];
-    operators: OperatorList;
+    opsUseArgs: boolean;
+    operators: OperatorListType;
     dependencies: string[];
 
     constructor(code: string) {
         this.errors = false;
         this.code = code;
 
-        let tokens: CodeToken[] = parseTokens(code);
+        let tokens: TokenType[] = parseTokens(code);
         this.tokens = tokens;
         this.hash = tokens.map(({code}) => code).join(' ');
 
         let {lhs, rhs, eq} = splitTokens(tokens);
         analyzeEq(lhs, eq);
-        analyzeRhs(rhs);
 
         this.name = analyzeName(lhs);
-        this.namedArgs = analyzeNamedArgs(lhs, this.name);
+        this.namedArgs = analyzeNamedArgs(lhs, this.name).reverse();
 
+        analyzeRhs(rhs, this.namedArgs);
         analyzeMatchingTokens(rhs);
 
         this.dependencies = analyzeDependencies(rhs, this.name, this.namedArgs);
@@ -48,7 +49,27 @@ export class Expression {
 
         if (!this.errors) {
             this.operators = createOperators(rhs);
+            this.opsUseArgs = this.operators.some(op => op.requiresArgs());
+            this.errors = tokens.some(token => token.errors.length > 0);
         }
+    }
+
+    appliedOperators<T>(args: { [string]: T } = {}): OperatorListType {
+        return this.opsUseArgs ? this.operators.map(op => op.applied(args)) : this.operators;
+    }
+
+    runTypeCheck(): TypeCheckContext {
+        let context = new TypeCheckContext();
+
+        let args = this.namedArgs.reduce((acc, arg) => {
+            acc[arg] = context.pop();
+            return acc;
+        }, {});
+
+        let appliedOperators = this.appliedOperators(args);
+        appliedOperators.forEach(op => op.runTypeCheck(context));
+
+        return context;
     }
 }
 

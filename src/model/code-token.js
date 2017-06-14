@@ -1,14 +1,16 @@
-import {Error} from './errors';
+// @flow
 
-export type CodeToken = {|
+import {RpnError} from './errors';
+
+export type TokenType = {|
     code: string,
     index: number,
     position: number,
-    errors: Error[],
+    errors: RpnError[],
     type: ?string,
-    match: ?CodeToken
+    match: ?TokenType
 |};
 
-export function newCodeToken(code: string, index: number, position: number): CodeToken {
+export function newCodeToken(code: string, index: number, position: number): TokenType {
     return {code, index, position, errors: [], type: null, match: null};
 }

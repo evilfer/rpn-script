@@ -1,6 +1,6 @@
 // @flow
-import type {CodeToken} from '../model/code-token';
-import {Error} from '../model/errors';
+import type {TokenType} from '../model/code-token';
+import {RpnError} from '../model/errors';
 
 const VALID_REF_START_CHARS = 'a-zA-Z_+\\-*\\/^$%!\'';
 const VALID_REF_CHARS = VALID_REF_START_CHARS + '0-9';
@@ -22,9 +22,9 @@ const BASIC_RHS_TOKENS = {
     ',': 'sep',
 };
 
-export function validateRefToken(token: CodeToken): boolean {
+export function validateRefToken(token: TokenType): boolean {
     if (!token.code.match(VALID_REF_REGEX)) {
-        token.errors.push(new Error('bad_ref'));
+        token.errors.push(new RpnError('bad_ref'));
         return false;
     }
 
@@ -32,7 +32,7 @@ export function validateRefToken(token: CodeToken): boolean {
 }
 
 
-export function validateRhsToken(token: CodeToken): boolean {
+export function validateRhsToken(token: TokenType, namedArgs: string[]): boolean {
     if (BASIC_RHS_TOKENS[token.code]) {
         token.type = BASIC_RHS_TOKENS[token.code];
         return true;
@@ -50,6 +50,11 @@ export function validateRhsToken(token: CodeToken): boolean {
 
     if (token.code.match(STRING_REGEX)) {
         token.type = 'string';
+        return true;
+    }
+
+    if (namedArgs.indexOf(token.code) >= 0) {
+        token.type = 'arg';
         return true;
     }
 

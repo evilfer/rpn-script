@@ -13,14 +13,14 @@
 
 
 /**
- * Operand:
+ * OperandType:
  * a representation of a value inside a Stack
  */
 
 
 /**
  * OperandType:
- * a description of the value hold by an Operand
+ * a description of the value hold by an OperandType
  */
 
 /**

@@ -1,6 +1,6 @@
 // @flow
 
-export class Error {
+export class RpnError {
     type: string;
 
     constructor(type: string) {

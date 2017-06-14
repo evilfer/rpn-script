@@ -1,6 +1,6 @@
 // @flow
 
-import type {CodeToken} from '../model/code-token';
+import type {TokenType} from '../model/code-token';
 import {newCodeToken} from '../model/code-token';
 
 const STRING_ESCAPED: string[] = ['\\\\n', '\\\\"', '\\\\\\\\', '"'];
@@ -39,7 +39,7 @@ function findString(code: string): ?[string, string, boolean, string] {
 }
 
 
-function parseOtherTokens(expr: string, exprPosition: number, tokens: CodeToken[]): void {
+function parseOtherTokens(expr: string, exprPosition: number, tokens: TokenType[]): void {
     let regex = /[^\s]+/g;
     let match;
 
@@ -51,7 +51,7 @@ function parseOtherTokens(expr: string, exprPosition: number, tokens: CodeToken[
     }
 }
 
-function splitSpecialTokens(token: string, tokenPosition: number, tokens: CodeToken[]): void {
+function splitSpecialTokens(token: string, tokenPosition: number, tokens: TokenType[]): void {
     let match;
     let remaining = token;
 
@@ -71,8 +71,8 @@ function splitSpecialTokens(token: string, tokenPosition: number, tokens: CodeTo
     }
 }
 
-export default function parseTokens(expr: string): CodeToken[] {
-    let tokens: CodeToken[] = [];
+export default function parseTokens(expr: string): TokenType[] {
+    let tokens: TokenType[] = [];
     let rest = expr;
     let stringFind;
     let restPosition = 0;
