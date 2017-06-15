@@ -1,6 +1,7 @@
 // @flow
 
 import type {TokenType} from './code-token';
+import type {ExprArityType} from './operands/types';
 import {createOperators} from './operators/create-operator';
 import parseTokens from '../parser/parse-tokens';
 import {
@@ -13,7 +14,7 @@ import {
     analyzeDependencies
 } from '../parser/analyze-tokens';
 import type {OperatorListType} from './base';
-import {TypeCheckContext} from './base';
+import ExprTypeCheckContext from './operands/expr-type-check-context';
 
 export class Expression {
     errors: boolean;
@@ -58,8 +59,8 @@ export class Expression {
         return this.opsUseArgs ? this.operators.map(op => op.applied(args)) : this.operators;
     }
 
-    runTypeCheck(): TypeCheckContext {
-        let context = new TypeCheckContext();
+    runTypeCheck(namespace: { [string]: ExprArityType } = {}): ExprTypeCheckContext {
+        let context = new ExprTypeCheckContext();
 
         let args = this.namedArgs.reduce((acc, arg) => {
             acc[arg] = context.pop();

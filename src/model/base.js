@@ -36,6 +36,7 @@ export class ExecutionContext<T> {
 }
 
 export class TypeCheckContext extends ExecutionContext<OperandType> {
+
     createInputElement(): OperandType {
         return anyType();
     }

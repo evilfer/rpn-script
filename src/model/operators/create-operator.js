@@ -2,8 +2,8 @@
 
 import {RpnError} from '../errors';
 import type {TokenType} from '../code-token';
-import type {OperatorListType} from './operator';
-import {Operator} from './operator';
+import {Operator} from '../base';
+import type {OperatorListType} from '../base';
 import {SINGLE_OPTS, MULTIPLE_OPTS} from './op-map';
 
 const SEP_ALLOWED = {
@@ -13,21 +13,31 @@ const SEP_ALLOWED = {
 };
 
 function parseCommaSep(tokens: TokenType[], sepAllowed: boolean): OperatorListType[] {
-    let rest = tokens;
     let items: OperatorListType[] = [];
+    let start = 0;
+    let containerLevel = 0;
 
-    while (rest.length > 0) {
-        let index = rest.findIndex(({type}) => type === 'sep');
-        let sepFound = index >= 0;
+    for (let i = 0; i < tokens.length; i++) {
+        let type = tokens[i].type || '';
 
-        if (sepFound && !sepAllowed) {
-            rest[index].errors.push(new RpnError('not_allowed'));
+        if (type.match(/(array|tuple|wrap)Open/)) {
+            containerLevel++;
+        } else if (type.match(/(array|tuple|wrap)Close/)) {
+            containerLevel--;
+        } else if (type === 'sep' && containerLevel === 0) {
+            let itemTokens = tokens.slice(start, i);
+            items.push(createOperators(itemTokens));
+            start = i + 1;
+
+            if (!sepAllowed) {
+                tokens[i].errors.push(new RpnError('not_allowed'));
+            }
         }
+    }
 
-        let sepIndex = sepFound ? index : rest.length;
-        let itemTokens = rest.slice(0, sepIndex);
-        items.push(createOperators(itemTokens));
-        rest = rest.slice(sepIndex + 1);
+    if (start > 0 || tokens.length > 0) {
+        let finalItemTokens = tokens.slice(start);
+        items.push(createOperators(finalItemTokens));
     }
 
     return items;

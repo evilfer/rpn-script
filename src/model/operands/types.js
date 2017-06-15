@@ -1,22 +1,26 @@
 // @flow
 
-export type OperandNameType = null | 'string' | 'number' | 'boolean' | 'array' | 'tuple' | 'wrapped';
+export type OperandNameType = 'any' | 'string' | 'number' | 'boolean' | 'array' | 'tuple' | 'wrapped';
 
-export type WrappedArityType = {| input: OperandType[], output: OperandType[] |};
+export type ExprArityType = {| input: OperandListType, output: OperandListType |};
+
+export type OperandListType = OperandType[];
+
 
 export type OperandType = {|
     type: OperandNameType,
-    arrayType: ?WrappedArityType,
-    tupleTypes: ?WrappedArityType[],
-    wrappedTypes: ?WrappedArityType
+    arrayType: ?OperandListType,
+    tupleTypes: ?OperandListType[],
+    wrappedTypes: ?ExprArityType,
+    name: ?string
 |};
 
-function newType(type: OperandNameType, wrappedTypes: ?WrappedArityType = null, arrayType: ?WrappedArityType = null, tupleTypes: ?WrappedArityType[] = null): OperandType {
-    return {type, wrappedTypes, arrayType, tupleTypes};
-
+function newType(type: OperandNameType, wrappedTypes: ?ExprArityType = null, arrayType: ?OperandListType = null, tupleTypes: ?OperandListType[] = null): OperandType {
+    return {type, wrappedTypes, arrayType, tupleTypes, name: null};
 }
+
 export function anyType(): OperandType {
-    return newType(null);
+    return newType('any');
 }
 
 export function numberType(): OperandType {
@@ -31,16 +35,16 @@ export function booleanType(): OperandType {
     return newType('boolean');
 }
 
-export function wrappedType(t: WrappedArityType): OperandType {
+export function wrappedType(t: ExprArityType): OperandType {
     return newType('wrapped', t);
 }
 
-export function arrayType(t: ?WrappedArityType): OperandType {
-    return newType('wrapped', null, t);
+export function arrayType(t: ?OperandListType): OperandType {
+    return newType('array', null, t);
 }
 
-export function tupleType(t: WrappedArityType[]): OperandType {
-    return newType('wrapped', null, null, t);
+export function tupleType(t: OperandListType[]): OperandType {
+    return newType('tuple', null, null, t);
 }
 
 export function literalType(t: 'boolean' | 'number' | 'string') {
