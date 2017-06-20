@@ -1,4 +1,3 @@
-// @flow
 
 export class RpnError {
     type: string;

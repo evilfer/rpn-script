@@ -1,7 +1,8 @@
 {
-  "compilerOptions": {
-    "declaration": true,
-    "strictNullChecks": true,
-    "noImplicitAny": true
-  }
+    "compilerOptions": {
+        "declaration": true,
+        "strictNullChecks": true,
+        "noImplicitAny": true,
+        "experimentalDecorators": true
+    }
 }

@@ -1,13 +1,12 @@
-// @flow
-
-import type {TokenType} from '../model/code-token';
+import {TokenType} from '../model/code-token';
 import {newCodeToken} from '../model/code-token';
+import {RpnError} from "../model/errors";
 
 const STRING_ESCAPED: string[] = ['\\\\n', '\\\\"', '\\\\\\\\', '"'];
 
 const REGEX: RegExp = new RegExp(`(${STRING_ESCAPED.join('|')})`);
 
-function findString(code: string): ?[string, string, boolean, string] {
+function findString(code: string): null | [string, string, boolean, string] {
     let index = code.indexOf('"');
     if (index < 0) {
         return null;
@@ -56,8 +55,7 @@ function splitSpecialTokens(token: string, tokenPosition: number, tokens: TokenT
     let remaining = token;
 
     while (match = remaining.match(/}([0-9]+:[0-9]+)?{|{|}|\)([0-9]+:[0-9]+)?\(|\(|\)|\[|]|,/)) {
-        // $FlowFixMe
-        let index = match.index;
+        let index = <number> match.index;
         if (index > 0) {
             tokens.push(newCodeToken(remaining.slice(0, index), tokens.length, tokenPosition));
         }
@@ -82,7 +80,7 @@ export default function parseTokens(expr: string): TokenType[] {
         parseOtherTokens(prev, restPosition, tokens);
         let stringToken = newCodeToken(string, tokens.length, restPosition + prev.length);
         if (!ended) {
-            stringToken.errors.push(new Error('unterminated_string'));
+            stringToken.errors.push(new RpnError('unterminated_string'));
         }
         tokens.push(stringToken);
         restPosition += prev.length + string.length;
