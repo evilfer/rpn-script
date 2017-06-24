@@ -1,8 +1,9 @@
 import {CodeToken} from '../code-token';
 import {Operator} from '../base';
 import {OperatorListType} from '../base';
+import {OperandType} from "../operands/operand-types";
 
-export class SingleTokenOperator extends Operator {
+export abstract class SingleTokenOperator extends Operator {
     token: CodeToken;
 
     constructor(token: CodeToken) {
@@ -29,13 +30,13 @@ export abstract class MultipleTokenOperator extends Operator {
 
     abstract cloneWith(appliedItems: OperatorListType[]): MultipleTokenOperator;
 
-    applied<T>(args: { [key: string]: T }): Operator {
+    appliedType(args: { [key: string]: OperandType }): Operator {
         if (!this.argsRequired) {
             return this;
         }
 
         let appliedItems: OperatorListType[] = this.items.map((item, i) => this.childrenRequireArgs[i] ?
-            item.map(op => op.applied(args)) :
+            item.map(op => op.appliedType(args)) :
             item
         );
 

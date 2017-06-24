@@ -1,6 +1,6 @@
-
 import {SingleTokenOperator} from './operator';
 import {CodeToken} from '../code-token';
+import {OperationType} from "../operands/operand-types";
 //import {TypeCheckContext} from '../base';
 //import {literalType} from '../operands/types';
 
@@ -15,9 +15,17 @@ export class LiteralOperator<T> extends SingleTokenOperator {
         this.type = type;
     }
 
-    /*runTypeCheck(context: TypeCheckContext) {
-        context.push(literalType(this.type));
-    }*/
+    getType(): OperationType {
+        return {
+            input: [],
+            output: [0],
+            types: {
+                0: {
+                    type: this.type
+                }
+            }
+        };
+    }
 }
 
 export class NumberOperator extends LiteralOperator<number> {

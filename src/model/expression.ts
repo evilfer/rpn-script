@@ -13,6 +13,7 @@ import {
     analyzeDependencies
 } from '../parser/analyze-tokens';
 import {OperatorListType} from './base';
+import {OperandType} from "./operands/operand-types";
 
 export class Expression {
     errors: boolean;
@@ -53,8 +54,8 @@ export class Expression {
         }
     }
 
-    appliedOperators<T>(args: { [key: string]: T } = {}): OperatorListType {
-        return this.opsUseArgs ? this.operators.map(op => op.applied(args)) : this.operators;
+    appliedTypeOperators(args: { [key: string]: OperandType } = {}): OperatorListType {
+        return this.opsUseArgs ? this.operators.map(op => op.appliedType(args)) : this.operators;
     }
 
     /*runTypeCheck(namespace: { [string]: ExprArityType } = {}): ExprTypeCheckContext {

@@ -1,6 +1,7 @@
 import {MultipleTokenOperator} from './operator';
 import {OperatorListType} from '../base';
 import {CodeToken} from '../code-token';
+import {OperationType} from "../operands/operand-types";
 
 
 export class WrappedOperator extends MultipleTokenOperator {
@@ -14,4 +15,13 @@ export class WrappedOperator extends MultipleTokenOperator {
         super(tokens, items);
         this.expr = items.length > 0 ? items[0] : [];
     }
+
+    getType(): OperationType {
+        return {
+            input: [],
+            output: [],
+            types: {}
+        };
+    }
+
 }

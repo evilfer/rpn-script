@@ -127,20 +127,20 @@ describe('expression parsing', () => {
     describe('applied operator creation', () => {
         it('should not create different operators if no named args', () => {
             let e = new Expression('1');
-            let ops = e.appliedOperators();
+            let ops = e.appliedTypeOperators();
             expect(ops).to.equal(e.operators);
         });
 
         it('should not create different operators if named args are not used', () => {
             let e = new Expression('x a = 1');
-            let ops = e.appliedOperators();
+            let ops = e.appliedTypeOperators();
             expect(ops).to.equal(e.operators);
         });
 
         it('should create different operators if named args are used', () => {
             let e = new Expression('x a = 1 x');
-            let ops = e.appliedOperators({x: 'x_operand'});
-            expect(ops).not.to.equal(e.operators);
+            let ops = e.appliedTypeOperators({x: {type: 'string'}});
+            expect(ops).not.to.deep.eq(e.operators);
 
             expect(ops.length).to.equal(2);
             let [n0, x0] = e.operators;
@@ -149,13 +149,13 @@ describe('expression parsing', () => {
             expect(n1).to.equal(n0);
 
             expect(x1).not.to.equal(x0);
-            expect(x1.constructor.name).to.equal('AppliedArgOperator');
-            expect((<AppliedArgOperator<string>>x1).operand).to.equal('x_operand');
+            expect(x1.constructor.name).to.deep.eq('TypeAppliedArgOperator');
+            expect((<AppliedArgOperator<string>>x1).operand).to.deep.eq({type: 'string'});
         });
 
         it('should create different operators if named args are used in nested operators', () => {
             let e = new Expression('x a = 1 [x, k]');
-            let ops = e.appliedOperators({x: 'x_operand'});
+            let ops = e.appliedTypeOperators({x: {type: 'string'}});
             expect(ops).not.to.equal(e.operators);
 
             expect(ops.length).to.equal(2);
@@ -170,8 +170,8 @@ describe('expression parsing', () => {
             expect(x1).not.to.equal(x0);
             expect(r1).to.equal(r0);
 
-            expect(x1.constructor.name).to.equal('AppliedArgOperator');
-            expect((<AppliedArgOperator<string>>x1).operand).to.equal('x_operand');
+            expect(x1.constructor.name).to.equal('TypeAppliedArgOperator');
+            expect((<AppliedArgOperator<string>>x1).operand).to.deep.eq({type: 'string'});
         });
     });
 });

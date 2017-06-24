@@ -1,4 +1,5 @@
 import {RpnError} from './errors';
+import {OperandType, OperationType} from "./operands/operand-types";
 
 export type OperatorListType = Operator[];
 
@@ -9,17 +10,14 @@ export abstract class Operator {
         this.errors = [];
     }
 
-    applied<T>(args: { [key: string]: T }): Operator {
+    appliedType(args: { [key: string]: OperandType }): Operator {
         return this;
     }
+
 
     requiresArgs(): boolean {
         return false;
     }
 
-
-
-    /*runTypeCheck(context: TypeCheckContext) {
-        throw new Error('runTypeCheck not implemented');
-    }*/
+    abstract getType(current: OperationType, namespace: { [name: string]: OperationType }): OperationType;
 }
