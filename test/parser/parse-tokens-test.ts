@@ -1,107 +1,103 @@
-import {suite, test, slow, timeout} from 'mocha-typescript';
 import {expect} from 'chai';
 import parseTokens from '../../src/parser/parse-tokens';
 
+function check(code: string, result: [[number, string]]) {
+    expect(parseTokens(code).map(({code, position}) => ({
+        code,
+        position
+    }))).to.deep.eq(result.map(([position, code]) => ({position, code})));
+}
 
-@suite
-class ParseTokens {
-
-    static check(code: string, result: [[number, string]]) {
-        expect(parseTokens(code).map(({code, position}) => ({
-            code,
-            position
-        }))).to.deep.eq(result.map(([position, code]) => ({position, code})));
-    }
-
-    @test simple() {
-        ParseTokens.check('x', [
+describe('parse tokens', () => {
+    it('should parse simple', () => {
+        check('x', [
             [0, 'x']
         ]);
-    }
+    });
 
-    @test multipleTokens() {
-        ParseTokens.check('1 2 +', [
+    it('should parse multiple tokens', () => {
+        check('1 2 +', [
             [0, '1'],
             [2, '2'],
             [4, '+']
         ]);
-    }
+    });
 
-    @test extraSpaces() {
-        ParseTokens.check('  1   2  +   ', [
+    it('should parse extra spaces', () => {
+        check('  1   2  +   ', [
             [2, '1'],
             [6, '2'],
             [9, '+']
         ]);
-    }
+    });
 
-    @test string() {
-        ParseTokens.check('"1"', [[0, '"1"']]);
-    }
+    it('should parse string', () => {
+        check('"1"', [[0, '"1"']]);
+    });
 
-    @test stringAndSpaces() {
-        ParseTokens.check(' "1"', [[1, '"1"']]);
-    }
+    it('should parse string and spaces', () => {
+        check(' "1"', [[1, '"1"']]);
+    });
 
-    @test stringAndRef() {
-        ParseTokens.check('a "1"', [[0, 'a'], [2, '"1"']]);
-    }
+    it('should parse string and ref', () => {
+        check('a "1"', [[0, 'a'], [2, '"1"']]);
+    });
 
 
-    @test stringWithSpaces() {
-        ParseTokens.check('"1 2"', [[0, '"1 2"']]);
-    }
+    it('should parse string with spaces', () => {
+        check('"1 2"', [[0, '"1 2"']]);
+    });
 
-    @test stringWithQuotes() {
-        ParseTokens.check('"1 \\" 2"', [[0, '"1 \\" 2"']]);
-    }
+    it('should parse string with quotes', () => {
+        check('"1 \\" 2"', [[0, '"1 \\" 2"']]);
+    });
 
-    @test multipleTokensIncludingString() {
-        ParseTokens.check('1 "a b c" concat', [
+    it('should parse multiple tokens including string', () => {
+        check('1 "a b c" concat', [
             [0, '1'],
             [2, '"a b c"'],
             [10, 'concat']
         ]);
-    }
+    });
 
-    @test simpleWrapped() {
-        ParseTokens.check('{1}', [
+    it('should parse simple wrapped', () => {
+        check('{1}', [
             [0, '{'],
             [1, '1'],
             [2, '}']
         ]);
-    }
+    });
 
-    @test wrapAndUnwrap() {
-        ParseTokens.check('{1} }{', [
+    it('should parse wrap and unwrap', () => {
+        check('{1} }{', [
             [0, '{'],
             [1, '1'],
             [2, '}'],
             [4, '}{']
         ]);
-    }
+    });
 
-    @test unwrapWithArity() {
-        ParseTokens.check('{1} }0:1{', [
+    it('should parse unwrap with arity', () => {
+        check('{1} }0:1{', [
             [0, '{'],
             [1, '1'],
             [2, '}'],
             [4, '}0:1{']
         ]);
-    }
+    });
 
-    @test tuples() {
-        ParseTokens.check('(1) )0:1( 1', [
+    it('should parse tuples', () => {
+        check('(1) )0:1( 1', [
             [0, '('],
             [1, '1'],
             [2, ')'],
             [4, ')0:1('],
             [10, '1']
         ]);
-    }
+    });
 
-    @test array() {
-        ParseTokens.check('"a" [1,3 , 4, 6 7 +] apply', [
+    it('should parse array', () => {
+        check('"a" [1,3 , 4, 6 7 +] apply', [
             [0, '"a"'],
             [4, '['],
             [5, '1'],
@@ -116,10 +112,10 @@ class ParseTokens {
             [19, ']'],
             [21, 'apply']
         ]);
-    }
+    });
 
-    @test tupleAndArray() {
-        ParseTokens.check('([1,3]) )0:1(', [
+    it('should parse tuple and array', () => {
+        check('([1,3]) )0:1(', [
             [0, '('],
             [1, '['],
             [2, '1'],
@@ -129,14 +125,14 @@ class ParseTokens {
             [6, ')'],
             [8, ')0:1(']
         ]);
-    }
+    });
 
-    @test stringWithTrailingSpaces() {
-        ParseTokens.check('"a b c  ', [[0, '"a b c  ']]);
-    }
+    it('should parse string with trailing spaces', () => {
+        check('"a b c  ', [[0, '"a b c  ']]);
+    });
 
-    @test namedArgs() {
-        ParseTokens.check('x y swap = y x', [
+    it('should parse named args', () => {
+        check('x y swap = y x', [
             [0, 'x'],
             [2, 'y'],
             [4, 'swap'],
@@ -144,6 +140,6 @@ class ParseTokens {
             [11, 'y'],
             [13, 'x']
         ]);
-    }
+    });
 
-}
+});

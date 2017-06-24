@@ -1,7 +1,6 @@
 // @flow
 
-import type {TokenType} from './code-token';
-import type {ExprArityType} from './operands/types';
+import {CodeToken} from './code-token';
 import {createOperators} from './operators/create-operator';
 import parseTokens from '../parser/parse-tokens';
 import {
@@ -13,14 +12,13 @@ import {
     analyzeMatchingTokens,
     analyzeDependencies
 } from '../parser/analyze-tokens';
-import type {OperatorListType} from './base';
-import ExprTypeCheckContext from './operands/expr-type-check-context';
+import {OperatorListType} from './base';
 
 export class Expression {
     errors: boolean;
-    name: ?string;
+    name: null | string;
     code: string;
-    tokens: TokenType[];
+    tokens: CodeToken[];
     hash: string;
     namedArgs: string[];
     opsUseArgs: boolean;
@@ -31,7 +29,7 @@ export class Expression {
         this.errors = false;
         this.code = code;
 
-        let tokens: TokenType[] = parseTokens(code);
+        let tokens: CodeToken[] = parseTokens(code);
         this.tokens = tokens;
         this.hash = tokens.map(({code}) => code).join(' ');
 
@@ -55,11 +53,11 @@ export class Expression {
         }
     }
 
-    appliedOperators<T>(args: { [string]: T } = {}): OperatorListType {
+    appliedOperators<T>(args: { [key: string]: T } = {}): OperatorListType {
         return this.opsUseArgs ? this.operators.map(op => op.applied(args)) : this.operators;
     }
 
-    runTypeCheck(namespace: { [string]: ExprArityType } = {}): ExprTypeCheckContext {
+    /*runTypeCheck(namespace: { [string]: ExprArityType } = {}): ExprTypeCheckContext {
         let context = new ExprTypeCheckContext();
 
         let args = this.namedArgs.reduce((acc, arg) => {
@@ -71,13 +69,5 @@ export class Expression {
         appliedOperators.forEach(op => op.runTypeCheck(context));
 
         return context;
-    }
-}
-
-export class CodeSheet {
-    errors: boolean;
-    code: string;
-    hashMap: {| [string]: Expression |};
-    nameMap: {| [string]: Expression |};
-    ordered: Expression[]
+    }*/
 }

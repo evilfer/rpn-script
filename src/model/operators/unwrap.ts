@@ -1,5 +1,3 @@
-// @flow
-
 import {SingleTokenOperator} from './operator';
 
 

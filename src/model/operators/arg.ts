@@ -1,19 +1,17 @@
-// @flow
-
 import {SingleTokenOperator} from './operator';
 import {Operator} from '../base';
-import type {TokenType} from '../code-token';
+import {CodeToken} from '../code-token';
 
 
 export class ArgOperator extends SingleTokenOperator {
     arg: string;
 
-    constructor(token: TokenType) {
+    constructor(token: CodeToken) {
         super(token);
         this.arg = token.code;
     }
 
-    applied<T>(args: { [string]: T }): Operator {
+    applied<T>(args: { [key: string]: T }): Operator {
         return new AppliedArgOperator(this.token, args[this.arg]);
     }
 
@@ -26,7 +24,7 @@ export class ArgOperator extends SingleTokenOperator {
 export class AppliedArgOperator<T> extends SingleTokenOperator {
     operand: T;
 
-    constructor(token: TokenType, operand: T) {
+    constructor(token: CodeToken, operand: T) {
         super(token);
         this.operand = operand;
     }

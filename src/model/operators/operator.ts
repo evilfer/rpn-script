@@ -1,26 +1,24 @@
-// @flow
-
-import type {TokenType} from '../code-token';
+import {CodeToken} from '../code-token';
 import {Operator} from '../base';
-import type {OperatorListType} from '../base';
+import {OperatorListType} from '../base';
 
 export class SingleTokenOperator extends Operator {
-    token: TokenType;
+    token: CodeToken;
 
-    constructor(token: TokenType) {
+    constructor(token: CodeToken) {
         super();
         this.token = token;
     }
 }
 
 
-export class MultipleTokenOperator extends Operator {
-    tokens: TokenType[];
+export abstract class MultipleTokenOperator extends Operator {
+    tokens: CodeToken[];
     items: OperatorListType[];
     childrenRequireArgs: boolean[];
     argsRequired: boolean;
 
-    constructor(tokens: TokenType[], items: OperatorListType[]) {
+    constructor(tokens: CodeToken[], items: OperatorListType[]) {
         super();
         this.tokens = tokens;
         this.items = items;
@@ -29,7 +27,9 @@ export class MultipleTokenOperator extends Operator {
         this.argsRequired = this.childrenRequireArgs.some(v => v);
     }
 
-    applied<T>(args: { [string]: T }): Operator {
+    abstract cloneWith(appliedItems: OperatorListType[]): MultipleTokenOperator;
+
+    applied<T>(args: { [key: string]: T }): Operator {
         if (!this.argsRequired) {
             return this;
         }
@@ -39,7 +39,7 @@ export class MultipleTokenOperator extends Operator {
             item
         );
 
-        return new (this.constructor)(this.tokens, appliedItems);
+        return this.cloneWith(appliedItems);
     }
 
     requiresArgs(): boolean {

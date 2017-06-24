@@ -1,9 +1,9 @@
-// @flow
-import type CodeToken from '../model/code-token';
 import {RpnError} from '../model/errors';
 import {validateRefToken, validateRhsToken} from './token-validation';
+import {CodeToken} from "../model/code-token";
 
-export function splitTokens(tokens: CodeToken[]): {| lhs: CodeToken[], rhs: CodeToken[], eq: ?CodeToken |} {
+
+export function splitTokens(tokens: CodeToken[]): { lhs: CodeToken[], rhs: CodeToken[], eq: null | CodeToken } {
     let index = tokens.findIndex(({code}) => code === '=');
     return {
         lhs: index >= 0 ? tokens.slice(0, index) : [],
@@ -12,7 +12,7 @@ export function splitTokens(tokens: CodeToken[]): {| lhs: CodeToken[], rhs: Code
     };
 }
 
-export function analyzeName(lhs: CodeToken[]): ?string {
+export function analyzeName(lhs: CodeToken[]): null | string {
     if (lhs.length > 0) {
         let token = lhs[lhs.length - 1];
         validateRefToken(token);
@@ -23,9 +23,9 @@ export function analyzeName(lhs: CodeToken[]): ?string {
     return null;
 }
 
-export function analyzeNamedArgs(lhs: CodeToken[], name: ?string): string[] {
+export function analyzeNamedArgs(lhs: CodeToken[], name: null | string): string[] {
     let namedArgTokens = lhs.slice(0, -1);
-    let namedArgs = [];
+    let namedArgs: string[] = [];
 
     namedArgTokens.forEach(token => {
         token.type = 'namedArg';
@@ -43,7 +43,7 @@ export function analyzeNamedArgs(lhs: CodeToken[], name: ?string): string[] {
     return namedArgs;
 }
 
-export function analyzeEq(lhs: CodeToken[], eq: ?CodeToken): boolean {
+export function analyzeEq(lhs: CodeToken[], eq: null | CodeToken): boolean {
     if (eq) {
         eq.type = 'eq';
 
@@ -69,7 +69,7 @@ function sameConstructType(a: CodeToken, b: CodeToken): boolean {
 }
 
 export function analyzeMatchingTokens(rhs: CodeToken[]) {
-    let levels = [];
+    let levels: CodeToken[] = [];
 
     rhs.forEach(token => {
         switch (token.type) {
@@ -96,8 +96,8 @@ export function analyzeMatchingTokens(rhs: CodeToken[]) {
     levels.forEach(token => token.errors.push(new RpnError('unmatched')));
 }
 
-export function analyzeDependencies(rhs: CodeToken[], name: ?string, namedArgs: string[]): string[] {
-    let dependencies = [];
+export function analyzeDependencies(rhs: CodeToken[], name: null | string, namedArgs: string[]): string[] {
+    let dependencies: string[] = [];
 
     rhs.forEach(token => {
         let {type, code} = token;

@@ -1,4 +1,4 @@
-import {TokenType} from '../model/code-token';
+import {CodeToken} from '../model/code-token';
 import {newCodeToken} from '../model/code-token';
 import {RpnError} from "../model/errors";
 
@@ -38,7 +38,7 @@ function findString(code: string): null | [string, string, boolean, string] {
 }
 
 
-function parseOtherTokens(expr: string, exprPosition: number, tokens: TokenType[]): void {
+function parseOtherTokens(expr: string, exprPosition: number, tokens: CodeToken[]): void {
     let regex = /[^\s]+/g;
     let match;
 
@@ -50,7 +50,7 @@ function parseOtherTokens(expr: string, exprPosition: number, tokens: TokenType[
     }
 }
 
-function splitSpecialTokens(token: string, tokenPosition: number, tokens: TokenType[]): void {
+function splitSpecialTokens(token: string, tokenPosition: number, tokens: CodeToken[]): void {
     let match;
     let remaining = token;
 
@@ -69,8 +69,8 @@ function splitSpecialTokens(token: string, tokenPosition: number, tokens: TokenT
     }
 }
 
-export default function parseTokens(expr: string): TokenType[] {
-    let tokens: TokenType[] = [];
+export default function parseTokens(expr: string): CodeToken[] {
+    let tokens: CodeToken[] = [];
     let rest = expr;
     let stringFind;
     let restPosition = 0;
