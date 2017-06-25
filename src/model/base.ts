@@ -1,5 +1,5 @@
 import {RpnError} from './errors';
-import {OperandType, OperationType} from "./operands/operand-types";
+import {OperationType} from "./operands/operand-types";
 
 export type OperatorListType = Operator[];
 
@@ -10,7 +10,7 @@ export abstract class Operator {
         this.errors = [];
     }
 
-    appliedType(args: { [key: string]: OperandType }): Operator {
+    appliedTypeWithArgs(args: { [key: string]: number }): Operator {
         return this;
     }
 
@@ -19,5 +19,5 @@ export abstract class Operator {
         return false;
     }
 
-    abstract getType(current: OperationType, namespace: { [name: string]: OperationType }): OperationType;
+    abstract applyTypes(current: OperationType, namespace: { [name: string]: OperationType }): void;
 }

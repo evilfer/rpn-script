@@ -1,6 +1,7 @@
 import {SingleTokenOperator} from './operator';
 import {CodeToken} from '../code-token';
 import {OperationType} from "../operands/operand-types";
+import {pushOutputMemberTypes} from "./run-type-check";
 //import {TypeCheckContext} from '../base';
 //import {literalType} from '../operands/types';
 
@@ -15,16 +16,10 @@ export class LiteralOperator<T> extends SingleTokenOperator {
         this.type = type;
     }
 
-    getType(): OperationType {
-        return {
-            input: [],
-            output: [0],
-            types: {
-                0: {
-                    type: this.type
-                }
-            }
-        };
+    applyTypes(current: OperationType, namespace: { [name: string]: OperationType }): void {
+        pushOutputMemberTypes(current, {
+            type: this.type
+        });
     }
 }
 

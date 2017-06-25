@@ -13,7 +13,8 @@ import {
     analyzeDependencies
 } from '../parser/analyze-tokens';
 import {OperatorListType} from './base';
-import {OperandType} from "./operands/operand-types";
+import {OperandType, OperationType} from "./operands/operand-types";
+import {cleanTypes} from "./operators/run-type-check";
 
 export class Expression {
     errors: boolean;
@@ -54,21 +55,43 @@ export class Expression {
         }
     }
 
-    appliedTypeOperators(args: { [key: string]: OperandType } = {}): OperatorListType {
-        return this.opsUseArgs ? this.operators.map(op => op.appliedType(args)) : this.operators;
+    appliedTypeOperators(args: { [key: string]: number } = {}): OperatorListType {
+        return this.opsUseArgs ? this.operators.map(op => op.appliedTypeWithArgs(args)) : this.operators;
+    }
+
+    getType(namespace: { [name: string]: OperationType }): OperationType {
+        let main: OperationType = {
+            input: [],
+            output: [],
+            types: {}
+        };
+
+        let argMap: { [name: string]: number } = {};
+
+        this.namedArgs.forEach((name, i) => {
+            main.input.push(i);
+            argMap[name] = i;
+            main.types[i] = {type: null};
+        });
+
+        let appliedOps = this.appliedTypeOperators(argMap);
+        appliedOps.forEach(operator => operator.applyTypes(main, namespace));
+
+        cleanTypes(main);
+        return main;
     }
 
     /*runTypeCheck(namespace: { [string]: ExprArityType } = {}): ExprTypeCheckContext {
-        let context = new ExprTypeCheckContext();
+     let context = new ExprTypeCheckContext();
 
-        let args = this.namedArgs.reduce((acc, arg) => {
-            acc[arg] = context.pop();
-            return acc;
-        }, {});
+     let args = this.namedArgs.reduce((acc, arg) => {
+     acc[arg] = context.pop();
+     return acc;
+     }, {});
 
-        let appliedOperators = this.appliedOperators(args);
-        appliedOperators.forEach(op => op.runTypeCheck(context));
+     let appliedOperators = this.appliedOperators(args);
+     appliedOperators.forEach(op => op.runTypeCheck(context));
 
-        return context;
-    }*/
+     return context;
+     }*/
 }

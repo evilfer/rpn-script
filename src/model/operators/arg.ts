@@ -12,8 +12,8 @@ export class ArgOperator extends SingleTokenOperator {
         this.arg = token.code;
     }
 
-    appliedType(args: { [key: string]: OperandType }): Operator {
-        let arg: OperandType = args[this.arg];
+    appliedTypeWithArgs(args: { [key: string]: number }): Operator {
+        let arg: number = args[this.arg];
         if (typeof arg === 'undefined') {
             throw new Error('no arg!');
         } else {
@@ -25,7 +25,7 @@ export class ArgOperator extends SingleTokenOperator {
         return true;
     }
 
-    getType(): OperationType {
+    applyTypes(current: OperationType, namespace: { [name: string]: OperationType }): void {
         throw new Error('not implemented');
     }
 }
@@ -40,14 +40,8 @@ export abstract class AppliedArgOperator<T> extends SingleTokenOperator {
     }
 }
 
-export class TypeAppliedArgOperator extends AppliedArgOperator<OperandType> {
-    getType(current: OperationType): OperationType {
-        return {
-            input: [],
-            output: [0],
-            types: {
-                0: this.operand
-            }
-        };
+export class TypeAppliedArgOperator extends AppliedArgOperator<number> {
+    applyTypes(current: OperationType, namespace: { [name: string]: OperationType }): void {
+        current.output.push(this.operand);
     }
 }

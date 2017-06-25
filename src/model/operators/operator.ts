@@ -30,13 +30,13 @@ export abstract class MultipleTokenOperator extends Operator {
 
     abstract cloneWith(appliedItems: OperatorListType[]): MultipleTokenOperator;
 
-    appliedType(args: { [key: string]: OperandType }): Operator {
+    appliedTypeWithArgs(args: { [key: string]: number }): Operator {
         if (!this.argsRequired) {
             return this;
         }
 
         let appliedItems: OperatorListType[] = this.items.map((item, i) => this.childrenRequireArgs[i] ?
-            item.map(op => op.appliedType(args)) :
+            item.map(op => op.appliedTypeWithArgs(args)) :
             item
         );
 
