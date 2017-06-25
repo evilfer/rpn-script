@@ -35,6 +35,8 @@ export class RefOperator extends SingleTokenOperator {
 
         arity.output.forEach(tid => current.output.push(tid));
 
-        matches.forEach(([a, b]) => matchTypes(current, a, b));
+        let tx: { [id: number]: number } = {};
+
+        matches.forEach(([a, b]) => matchTypes(current, tx, a, b));
     }
 }

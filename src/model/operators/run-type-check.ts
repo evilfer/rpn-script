@@ -58,9 +58,94 @@ export function pushOutputMemberTypes(main: OperationType, type: OperandType) {
     main.output.push(nid);
 }
 
-export function matchTypes(main: OperationType, a: number, b: number) {
+enum Match {A, B}
 
+function matchArrays(main: OperationType, tx: { [id: number]: number }, newType: OperandType, arrayA: null | TypeArity, arrayB: null | TypeArity): void {
+    newType.array = matchArity(main, tx, arrayA, arrayB);
 }
+
+function matchArity(main: OperationType, tx: { [id: number]: number }, arityA: null | TypeArity, arityB: null | TypeArity): null | TypeArity {
+    if (arityA === null) {
+        return arityB;
+    } else if (arityB === null) {
+        return arityA;
+    }
+
+    if (arityA.input.length !== arityB.input.length) {
+        throw new Error('not matching type');
+    }
+
+    if (arityA.output.length !== arityB.output.length) {
+        throw new Error('not matching type');
+    }
+
+    arityA.input.forEach((a, i) => matchTypes(main, tx, a, arityB.input[i]));
+    arityA.output.forEach((a, i) => matchTypes(main, tx, a, arityB.output[i]));
+
+    return arityA;
+}
+
+
+export function matchTypes(main: OperationType, tx: { [id: number]: number }, a: number, b: number): void {
+    if (a === b) {
+        return;
+    }
+
+    let typeA = main.types[a];
+    let typeB = main.types[b];
+    let newType: OperandType;
+
+    if (typeA.type === null) {
+        newType = typeB;
+    } else if (typeB.type === null) {
+        newType = typeA;
+    } else if (typeA.type !== typeB.type) {
+        throw new Error('not matching types');
+    } else {
+        newType = {type: typeA.type};
+        switch (newType.type) {
+            case 'array':
+                matchArrays(main, tx, newType, typeA.array || null, typeB.array || null);
+                break;
+        }
+    }
+
+    main.types[a] = newType;
+    main.types[b] = newType;
+
+    replaceTypeIdWith(main, b, a);
+
+    tx[b] = a;
+}
+
+function replaceTypeIdWithInList(main: OperationType, from: number, to: number, list: number[]): void {
+    list.forEach((v, i, arr) => {
+        if (v === from) {
+            arr[i] = to;
+        }
+    });
+}
+
+function replaceTypeIdWithInArity(main: OperationType, from: number, to: number, container: TypeArity): void {
+    replaceTypeIdWithInList(main, from, to, container.input);
+    replaceTypeIdWithInList(main, from, to, container.output);
+}
+
+function replaceTypeIdWith(main: OperationType, from: number, to: number): void {
+    replaceTypeIdWithInArity(main, from, to, main);
+    Object.keys(main.types).map(id => main.types[parseInt(id)]).forEach(type => {
+        if (type.array) {
+            replaceTypeIdWithInArity(main, from, to, type.array);
+        }
+        if (type.wrapped) {
+            replaceTypeIdWithInArity(main, from, to, type.wrapped);
+        }
+        if (type.tuple) {
+            type.tuple.forEach(arity => replaceTypeIdWithInArity(main, from, to, arity));
+        }
+    });
+}
+
 
 function markUsedType(main: OperationType, used: Set<number>, id: number) {
     used.add(id);

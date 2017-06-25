@@ -80,18 +80,4 @@ export class Expression {
         cleanTypes(main);
         return main;
     }
-
-    /*runTypeCheck(namespace: { [string]: ExprArityType } = {}): ExprTypeCheckContext {
-     let context = new ExprTypeCheckContext();
-
-     let args = this.namedArgs.reduce((acc, arg) => {
-     acc[arg] = context.pop();
-     return acc;
-     }, {});
-
-     let appliedOperators = this.appliedOperators(args);
-     appliedOperators.forEach(op => op.runTypeCheck(context));
-
-     return context;
-     }*/
 }

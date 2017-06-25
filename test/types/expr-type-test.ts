@@ -29,6 +29,38 @@ describe('expression ref operator types', () => {
                     1: {type: 'number'},
                     2: {type: 'number'}
                 }
+            },
+            'concat': {
+                input: [0, 1],
+                output: [2],
+                types: {
+                    0: {type: 'string'},
+                    1: {type: 'string'},
+                    2: {type: 'string'}
+                }
+            },
+            'switch': {
+                input: [0, 1],
+                output: [1, 0],
+                types: {
+                    0: {type: null},
+                    1: {type: null}
+                }
+            },
+            'arr_get': {
+                input: [0, 2],
+                output: [1],
+                types: {
+                    0: {
+                        type: 'array',
+                        array: {
+                            input: [],
+                            output: [1]
+                        }
+                    },
+                    1: {type: null},
+                    2: {type: 'number'}
+                }
             }
         };
     });
@@ -142,6 +174,42 @@ describe('expression ref operator types', () => {
                     1: {type: 'number'},
                     3: {type: 'number'},
                     5: {type: 'number'}
+                }
+            });
+        });
+
+        it('should infer types of used operands', () => {
+            let e = new Expression('switch add');
+            let type = e.getType(namespace);
+
+            expect(type).to.deep.eq({
+                input: [0, 1],
+                output: [4],
+                types: {
+                    0: {type: 'number'},
+                    1: {type: 'number'},
+                    4: {type: 'number'}
+                }
+            });
+        });
+
+        it('should infer type of expected array', () => {
+            let e = new Expression('0 arr_get " world" concat');
+            let type = e.getType(namespace);
+
+            expect(type).to.deep.eq({
+                input: [1],
+                output: [7],
+                types: {
+                    1: {
+                        type: 'array',
+                        array: {
+                            input: [],
+                            output: [2]
+                        }
+                    },
+                    2: {type: 'string'},
+                    7: {type: 'string'}
                 }
             });
         });
