@@ -1,5 +1,6 @@
 import {expect} from 'chai';
 import {Expression} from '../../src/model/expression';
+import debugOpType2string from "../../src/model/operands/debug-operation-type-to-string";
 
 describe('basic operator types', () => {
     describe('literal types', () => {
@@ -20,6 +21,8 @@ describe('basic operator types', () => {
                     }
                 }
             });
+
+            expect(debugOpType2string(type)).to.equal('number number');
         });
 
         it('should provide string literal type', () => {
@@ -37,6 +40,8 @@ describe('basic operator types', () => {
                     }
                 }
             });
+
+            expect(debugOpType2string(type)).to.equal('string string');
         });
     });
 
@@ -55,6 +60,7 @@ describe('basic operator types', () => {
                     }
                 }
             });
+            expect(debugOpType2string(type)).to.equal('A:[-]');
         });
 
         it('should provide literal type array', () => {
@@ -74,6 +80,7 @@ describe('basic operator types', () => {
                     }
                 }
             });
+            expect(debugOpType2string(type)).to.equal('[number]');
         });
 
         it('should provide multiple literal type array', () => {
@@ -96,6 +103,7 @@ describe('basic operator types', () => {
                     }
                 }
             });
+            expect(debugOpType2string(type)).to.equal('[number string]');
         });
 
         it('should handle nested arrays', () => {
@@ -116,6 +124,7 @@ describe('basic operator types', () => {
                     }
                 }
             });
+            expect(debugOpType2string(type)).to.equal('A:[B:[-]]');
         });
     });
 
@@ -134,6 +143,7 @@ describe('basic operator types', () => {
                     }
                 }
             });
+            expect(debugOpType2string(type)).to.equal('()');
         });
 
         it('should provide literal tuple', () => {
@@ -162,6 +172,8 @@ describe('basic operator types', () => {
                     }
                 }
             });
+            expect(debugOpType2string(type)).to.equal('(number, string)');
+
         });
     });
 
@@ -183,6 +195,7 @@ describe('basic operator types', () => {
                     }
                 }
             });
+            expect(debugOpType2string(type)).to.equal('{}');
         });
 
         it('should provide literal wrapped operators', () => {
@@ -205,6 +218,7 @@ describe('basic operator types', () => {
                     }
                 }
             });
+            expect(debugOpType2string(type)).to.equal('{number}');
         });
     });
 

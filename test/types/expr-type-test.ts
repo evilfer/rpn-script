@@ -1,6 +1,7 @@
 import {expect} from "chai";
 import {Expression} from '../../src/model/expression';
 import {OperationType} from "../../src/model/operands/operand-types";
+import debugOpType2string from "../../src/model/operands/debug-operation-type-to-string";
 
 describe('expression ref operator types', () => {
     let namespace: { [name: string]: OperationType };
@@ -76,6 +77,7 @@ describe('expression ref operator types', () => {
                     0: {type: 'string'}
                 }
             });
+            expect(debugOpType2string(type)).to.equal('string');
         });
 
         it('should apply multiple expr', () => {
@@ -89,6 +91,7 @@ describe('expression ref operator types', () => {
                     1: {type: 'number'}
                 }
             });
+            expect(debugOpType2string(type)).to.equal('string number');
         });
 
         it('should use expressions in arrays', () => {
@@ -105,6 +108,7 @@ describe('expression ref operator types', () => {
                     }
                 }
             });
+            expect(debugOpType2string(type)).to.equal('[string]');
         });
 
         it('should use expressions in wraps', () => {
@@ -122,6 +126,7 @@ describe('expression ref operator types', () => {
                     }
                 }
             });
+            expect(debugOpType2string(type)).to.equal('{string number}');
         });
 
         it('should use expressions in tuples', () => {
@@ -144,6 +149,7 @@ describe('expression ref operator types', () => {
                     }
                 }
             });
+            expect(debugOpType2string(type)).to.equal('(number, string, number)');
         });
     });
 
@@ -160,6 +166,7 @@ describe('expression ref operator types', () => {
                     2: {type: 'number'}
                 }
             });
+            expect(debugOpType2string(type)).to.equal('number number -> number');
         });
 
         it('should combine function expr', () => {
@@ -176,6 +183,7 @@ describe('expression ref operator types', () => {
                     5: {type: 'number'}
                 }
             });
+            expect(debugOpType2string(type)).to.equal('number number number -> number');
         });
 
         it('should infer types of used operands', () => {
@@ -191,6 +199,7 @@ describe('expression ref operator types', () => {
                     4: {type: 'number'}
                 }
             });
+            expect(debugOpType2string(type)).to.equal('number number -> number');
         });
 
         it('should infer type of expected array', () => {
@@ -212,6 +221,7 @@ describe('expression ref operator types', () => {
                     7: {type: 'string'}
                 }
             });
+            expect(debugOpType2string(type)).to.equal('[string] -> string');
         });
     });
 });
