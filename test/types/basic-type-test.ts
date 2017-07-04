@@ -52,15 +52,18 @@ describe('basic operator types', () => {
 
             expect(type).to.deep.eq({
                 input: [],
-                output: [0],
+                output: [1],
                 types: {
                     0: {
+                        type: null
+                    },
+                    1: {
                         type: 'array',
-                        array: null
+                        array: 0
                     }
                 }
             });
-            expect(debugOpType2string(type)).to.equal('A:[-]');
+            expect(debugOpType2string(type)).to.equal('A:[B:?]');
         });
 
         it('should provide literal type array', () => {
@@ -76,7 +79,7 @@ describe('basic operator types', () => {
                     },
                     1: {
                         type: 'array',
-                        array: {input: [], output: [0]}
+                        array: 0
                     }
                 }
             });
@@ -84,26 +87,23 @@ describe('basic operator types', () => {
         });
 
         it('should provide multiple literal type array', () => {
-            let e = new Expression('[1 "1"]');
+            let e = new Expression('["1", "2"]');
             let type = e.getType({});
 
             expect(type).to.deep.eq({
                 input: [],
-                output: [2],
+                output: [1],
                 types: {
                     0: {
-                        type: 'number'
-                    },
-                    1: {
                         type: 'string'
                     },
-                    2: {
+                    1: {
                         type: 'array',
-                        array: {input: [], output: [0, 1]}
+                        array: 0
                     }
                 }
             });
-            expect(debugOpType2string(type)).to.equal('[number string]');
+            expect(debugOpType2string(type)).to.equal('[string]');
         });
 
         it('should handle nested arrays', () => {
@@ -112,19 +112,22 @@ describe('basic operator types', () => {
 
             expect(type).to.deep.eq({
                 input: [],
-                output: [1],
+                output: [2],
                 types: {
                     0: {
                         type: 'array',
-                        array: null
+                        array: 1
                     },
                     1: {
+                        type: null
+                    },
+                    2: {
                         type: 'array',
-                        array: {input: [], output: [0]}
+                        array: 0
                     }
                 }
             });
-            expect(debugOpType2string(type)).to.equal('A:[B:[-]]');
+            expect(debugOpType2string(type)).to.equal('A:[B:[C:?]]');
         });
     });
 
@@ -162,13 +165,7 @@ describe('basic operator types', () => {
                     },
                     2: {
                         type: 'tuple',
-                        tuple: [{
-                            input: [],
-                            output: [0]
-                        }, {
-                            input: [],
-                            output: [1]
-                        }]
+                        tuple: [0, 1]
                     }
                 }
             });

@@ -18,32 +18,40 @@ function nextId(opty: OperationType): number {
     return Math.max(0, Math.max.apply(null, ids) + 1);
 }
 
-function addTypesFromSubToMain(main: OperationType, sub: OperationType, tx: { [id: number]: number }, arity: TypeArity): TypeArity {
-    let txId: { (id: number): number } = id => {
-        if (typeof tx[id] === 'number') {
-            return tx[id];
-        } else {
-            let nid = nextId(main);
-            tx[id] = nid;
-            let newType: OperandType = {...sub.types[id]};
-            main.types[nid] = newType;
+export function addAnyType(main: OperationType): number {
+    let nid = nextId(main);
+    let newType: OperandType = {type: null};
+    main.types[nid] = newType;
+    return nid;
+}
 
-            if (newType.array) {
-                newType.array = addTypesFromSubToMain(main, sub, tx, newType.array);
-            }
-            if (newType.tuple) {
-                newType.tuple = newType.tuple.map(a => addTypesFromSubToMain(main, sub, tx, a));
-            }
-            if (newType.wrapped) {
-                newType.wrapped = addTypesFromSubToMain(main, sub, tx, newType.wrapped);
-            }
-            return nid;
+
+function addTypeFromSubToMain(main: OperationType, sub: OperationType, tx: { [id: number]: number }, id: number): number {
+    if (typeof tx[id] === 'number') {
+        return tx[id];
+    } else {
+        let nid = nextId(main);
+        tx[id] = nid;
+        let newType: OperandType = {...sub.types[id]};
+        main.types[nid] = newType;
+
+        if (typeof newType.array === 'number') {
+            newType.array = addTypeFromSubToMain(main, sub, tx, newType.array);
         }
-    };
+        if (newType.tuple) {
+            newType.tuple = newType.tuple.map(id => addTypeFromSubToMain(main, sub, tx, id));
+        }
+        if (newType.wrapped) {
+            newType.wrapped = addTypesFromSubToMain(main, sub, tx, newType.wrapped);
+        }
+        return nid;
+    }
+}
 
+function addTypesFromSubToMain(main: OperationType, sub: OperationType, tx: { [id: number]: number }, arity: TypeArity): TypeArity {
     return {
-        input: arity.input.map(txId),
-        output: arity.output.map(txId)
+        input: arity.input.map(id => addTypeFromSubToMain(main, sub, tx, id)),
+        output: arity.output.map(id => addTypeFromSubToMain(main, sub, tx, id))
     };
 }
 
@@ -58,10 +66,27 @@ export function pushOutputMemberTypes(main: OperationType, type: OperandType) {
     main.output.push(nid);
 }
 
-enum Match {A, B}
 
-function matchArrays(main: OperationType, tx: { [id: number]: number }, newType: OperandType, arrayA: null | TypeArity, arrayB: null | TypeArity): void {
-    newType.array = matchArity(main, tx, arrayA, arrayB);
+function matchArrays(main: OperationType, tx: { [id: number]: number }, newType: OperandType, arrayA: number, arrayB: number): void {
+    matchTypes(main, tx, arrayA, arrayB);
+    newType.array = arrayA;
+}
+
+function matchTuples(main: OperationType, tx: { [id: number]: number }, newType: OperandType, tupleA: number[], tupleB: number[]): void {
+    if (tupleA.length !== tupleB.length) {
+        throw new Error('tuple length does not match');
+    }
+    tupleA.forEach((a, i) => matchTypes(main, tx, a, tupleB[i]));
+    newType.tuple = tupleA;
+}
+
+function matchWrapped(main: OperationType, tx: { [id: number]: number }, newType: OperandType, wrappedA: undefined | TypeArity, wrappedB: undefined | TypeArity): void {
+    if (!wrappedA || !wrappedB) {
+        throw new Error('missing wrapped arity');
+    }
+
+    matchArity(main, tx, wrappedA, wrappedB);
+    newType.wrapped = wrappedA;
 }
 
 function matchArity(main: OperationType, tx: { [id: number]: number }, arityA: null | TypeArity, arityB: null | TypeArity): null | TypeArity {
@@ -105,8 +130,13 @@ export function matchTypes(main: OperationType, tx: { [id: number]: number }, a:
         newType = {type: typeA.type};
         switch (newType.type) {
             case 'array':
-                matchArrays(main, tx, newType, typeA.array || null, typeB.array || null);
+                matchArrays(main, tx, newType, typeA.array || 0, typeB.array || 0);
                 break;
+            case 'tuple':
+                matchTuples(main, tx, newType, typeA.tuple || [], typeB.tuple || []);
+                break;
+            case 'wrapped':
+                matchWrapped(main, tx, newType, typeA.wrapped, typeB.wrapped);
         }
     }
 
@@ -118,7 +148,7 @@ export function matchTypes(main: OperationType, tx: { [id: number]: number }, a:
     tx[b] = a;
 }
 
-function replaceTypeIdWithInList(main: OperationType, from: number, to: number, list: number[]): void {
+function replaceTypeIdWithInList(from: number, to: number, list: number[]): void {
     list.forEach((v, i, arr) => {
         if (v === from) {
             arr[i] = to;
@@ -126,38 +156,44 @@ function replaceTypeIdWithInList(main: OperationType, from: number, to: number, 
     });
 }
 
-function replaceTypeIdWithInArity(main: OperationType, from: number, to: number, container: TypeArity): void {
-    replaceTypeIdWithInList(main, from, to, container.input);
-    replaceTypeIdWithInList(main, from, to, container.output);
+function replaceTypeIdWithInArity(from: number, to: number, container: TypeArity): void {
+    replaceTypeIdWithInList(from, to, container.input);
+    replaceTypeIdWithInList(from, to, container.output);
 }
 
 function replaceTypeIdWith(main: OperationType, from: number, to: number): void {
-    replaceTypeIdWithInArity(main, from, to, main);
+    replaceTypeIdWithInArity(from, to, main);
     Object.keys(main.types).map(id => main.types[parseInt(id)]).forEach(type => {
-        if (type.array) {
-            replaceTypeIdWithInArity(main, from, to, type.array);
+        if (type.array === from) {
+            type.array = to;
         }
         if (type.wrapped) {
-            replaceTypeIdWithInArity(main, from, to, type.wrapped);
+            replaceTypeIdWithInArity(from, to, type.wrapped);
         }
         if (type.tuple) {
-            type.tuple.forEach(arity => replaceTypeIdWithInArity(main, from, to, arity));
+            type.tuple.forEach((id, i, arr) => {
+                if (id === from) {
+                    arr[i] = to;
+                }
+            });
         }
     });
 }
 
 
 function markUsedType(main: OperationType, used: Set<number>, id: number) {
-    used.add(id);
-    let type = main.types[id];
-    if (type.wrapped) {
-        markUsedTypesArity(main, used, type.wrapped);
-    }
-    if (type.array) {
-        markUsedTypesArity(main, used, type.array);
-    }
-    if (type.tuple) {
-        type.tuple.forEach(a => markUsedTypesArity(main, used, a));
+    if (!used.has(id)) {
+        used.add(id);
+        let type = main.types[id];
+        if (type.wrapped) {
+            markUsedTypesArity(main, used, type.wrapped);
+        }
+        if (typeof type.array === 'number') {
+            markUsedType(main, used, type.array);
+        }
+        if (type.tuple) {
+            type.tuple.forEach(a => markUsedType(main, used, a));
+        }
     }
 }
 

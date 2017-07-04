@@ -1,7 +1,7 @@
 import {MultipleTokenOperator} from './operator';
 import {OperatorListType} from '../base';
 import {OperationType, TypeArity} from "../operands/operand-types";
-import {arityFromSubToMain, pushOutputMemberTypes, runTypeCheck} from "./run-type-check";
+import {addAnyType, arityFromSubToMain, pushOutputMemberTypes, runTypeCheck} from "./run-type-check";
 
 export class ArrayOperator extends MultipleTokenOperator {
     cloneWith(appliedItems: OperatorListType[]): MultipleTokenOperator {
@@ -9,13 +9,19 @@ export class ArrayOperator extends MultipleTokenOperator {
     }
 
     applyTypes(current: OperationType, namespace: { [name: string]: OperationType }): void {
-        let arrayArity: null | TypeArity = this.items.length > 0 ?
-            arityFromSubToMain(current, runTypeCheck(this.items[0], namespace)) :
-            null;
+        let arrayType: number;
+
+        if (this.items.length > 0) {
+
+            let arrayArity: TypeArity = arityFromSubToMain(current, runTypeCheck(this.items[0], namespace));
+            arrayType = arrayArity.output[0];
+        } else {
+            arrayType = addAnyType(current);
+        }
 
         pushOutputMemberTypes(current, {
             type: 'array',
-            array: arrayArity
+            array: arrayType
         });
     }
 }
@@ -26,11 +32,13 @@ export class TupleOperator extends MultipleTokenOperator {
     }
 
     applyTypes(current: OperationType, namespace: { [name: string]: OperationType }): void {
-        let tupleArity: TypeArity[] = this.items.map(item => arityFromSubToMain(current, runTypeCheck(item, namespace)));
+        let tupleTypes: number[] = this.items.map(item => {
+            return arityFromSubToMain(current, runTypeCheck(item, namespace)).output[0];
+        });
 
         pushOutputMemberTypes(current, {
             type: 'tuple',
-            tuple: tupleArity
+            tuple: tupleTypes
         });
     }
 }

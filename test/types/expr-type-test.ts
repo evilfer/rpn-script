@@ -54,10 +54,7 @@ describe('expression ref operator types', () => {
                 types: {
                     0: {
                         type: 'array',
-                        array: {
-                            input: [],
-                            output: [1]
-                        }
+                        array: 1
                     },
                     1: {type: null},
                     2: {type: 'number'}
@@ -104,7 +101,7 @@ describe('expression ref operator types', () => {
                     0: {type: 'string'},
                     1: {
                         type: 'array',
-                        array: {input: [], output: [0]}
+                        array: 0
                     }
                 }
             });
@@ -141,11 +138,7 @@ describe('expression ref operator types', () => {
                     2: {type: 'number'},
                     3: {
                         type: 'tuple',
-                        tuple: [
-                            {input: [], output: [0]},
-                            {input: [], output: [1]},
-                            {input: [], output: [2]}
-                        ]
+                        tuple: [0, 1, 2]
                     }
                 }
             });
@@ -212,10 +205,7 @@ describe('expression ref operator types', () => {
                 types: {
                     1: {
                         type: 'array',
-                        array: {
-                            input: [],
-                            output: [2]
-                        }
+                        array: 2
                     },
                     2: {type: 'string'},
                     7: {type: 'string'}

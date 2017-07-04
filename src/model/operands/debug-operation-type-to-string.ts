@@ -17,9 +17,9 @@ function isUndefined(types: { [id: number]: OperandType }, id: number): boolean 
         case null:
             return true;
         case 'array':
-            return !ot.array || arityIsUndefined(types, ot.array);
+            return isUndefined(types, ot.array || 0);
         case 'tuple':
-            return !ot.tuple || ot.tuple.some(a => arityIsUndefined(types, a));
+            return !ot.tuple || ot.tuple.some(a => isUndefined(types, a));
         case 'wrapped':
             return !ot.wrapped || arityIsUndefined(types, ot.wrapped);
         default:
@@ -47,11 +47,11 @@ function typeStr(types: { [id: number]: OperandType }, nameMap: { [id: number]: 
         case null:
             return '?';
         case 'array': {
-            let innerType = ot.array ? arity2string(types, nameMap, ot.array) : '-';
+            let innerType = type2string(types, nameMap, ot.array || 0);
             return `[${innerType}]`;
         }
         case 'tuple': {
-            let innerTypes = ot.tuple ? ot.tuple.map(a => arity2string(types, nameMap, a)).join(', ') : '-';
+            let innerTypes = ot.tuple ? ot.tuple.map(a => type2string(types, nameMap, a)).join(', ') : '-';
             return `(${innerTypes})`;
         }
         case 'wrapped': {
@@ -63,12 +63,14 @@ function typeStr(types: { [id: number]: OperandType }, nameMap: { [id: number]: 
     }
 }
 
+function type2string(types: { [id: number]: OperandType }, nameMap: { [id: number]: string }, id: number) {
+    let name = typeName(types, nameMap, id);
+    let str = typeStr(types, nameMap, id);
+    return name ? `${name}:${str}` : str;
+}
+
 function list2string(types: { [id: number]: OperandType }, nameMap: { [id: number]: string }, list: number[]): string {
-    return list.map(type => {
-        let name = typeName(types, nameMap, type);
-        let str = typeStr(types, nameMap, type);
-        return name ? `${name}:${str}` : str;
-    }).join(' ');
+    return list.map(type => type2string(types, nameMap, type)).join(' ');
 }
 
 function arity2string(types: { [id: number]: OperandType }, nameMap: { [id: number]: string }, arity: TypeArity): string {

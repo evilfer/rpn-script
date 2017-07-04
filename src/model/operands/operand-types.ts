@@ -6,9 +6,9 @@ export interface TypeArity {
 
 export interface OperandType {
     type: null | 'string' | 'number' | 'boolean' | 'array' | 'tuple' | 'wrapped',
-    array?: null | TypeArity,
+    array?: number,
     wrapped?: TypeArity,
-    tuple?: TypeArity[]
+    tuple?: number[]
 }
 
 export interface OperationType extends TypeArity {
