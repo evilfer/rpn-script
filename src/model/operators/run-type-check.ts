@@ -59,6 +59,13 @@ export function arityFromSubToMain(main: OperationType, sub: OperationType): Typ
     return addTypesFromSubToMain(main, sub, {}, sub);
 }
 
+export function popInputType(main: OperationType): number {
+    if (main.output.length > 0) {
+        return main.output.pop() || 0;
+    } else {
+        return addAnyType(main);
+    }
+}
 
 export function pushOutputMemberTypes(main: OperationType, type: OperandType) {
     let nid = nextId(main);
@@ -66,6 +73,18 @@ export function pushOutputMemberTypes(main: OperationType, type: OperandType) {
     main.output.push(nid);
 }
 
+export function popTypeAndMatch(main: OperationType, id: number) {
+    if (main.output.length > 0) {
+        let matched = main.output.pop() || 0;
+        matchTypes(main, {}, matched, id);
+    } else {
+        main.input.unshift(id);
+    }
+}
+
+export function pushType(main: OperationType, id: number) {
+    main.output.push(id);
+}
 
 function matchArrays(main: OperationType, tx: { [id: number]: number }, newType: OperandType, arrayA: number, arrayB: number): void {
     matchTypes(main, tx, arrayA, arrayB);
@@ -87,6 +106,32 @@ function matchWrapped(main: OperationType, tx: { [id: number]: number }, newType
 
     matchArity(main, tx, wrappedA, wrappedB);
     newType.wrapped = wrappedA;
+}
+
+export function matchExpectedWrapped(main: OperationType, id: number, arity: null | { input: number, output: number }): void {
+    let ot = main.types[id];
+    switch (ot.type) {
+        case null:
+            if (arity === null) {
+                throw new Error('unknown unwrap arity undefined');
+            }
+            ot.type = 'wrapped';
+            ot.wrapped = {
+                input: [...Array(arity.input).keys()].map(_ => addAnyType(main)),
+                output: [...Array(arity.output).keys()].map(_ => addAnyType(main)),
+            };
+            break;
+        case 'wrapped':
+            if (arity !== null && ot.wrapped && (
+                    ot.wrapped.input.length !== arity.input ||
+                    ot.wrapped.output.length !== arity.output
+                )) {
+                throw new Error('mismatched wrapped expression arity');
+            }
+            break;
+        default:
+            throw new Error('mismatched types');
+    }
 }
 
 function matchArity(main: OperationType, tx: { [id: number]: number }, arityA: null | TypeArity, arityB: null | TypeArity): null | TypeArity {

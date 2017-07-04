@@ -179,7 +179,7 @@ describe('expression ref operator types', () => {
             expect(debugOpType2string(type)).to.equal('number number number -> number');
         });
 
-        it('should infer types of used operands', () => {
+        it('should infer types of used operands (all)', () => {
             let e = new Expression('switch add');
             let type = e.getType(namespace);
 
@@ -193,6 +193,13 @@ describe('expression ref operator types', () => {
                 }
             });
             expect(debugOpType2string(type)).to.equal('number number -> number');
+        });
+
+        it('should infer types of used operands (partial)', () => {
+            let e = new Expression('switch 1 add');
+            let type = e.getType(namespace);
+
+            expect(debugOpType2string(type)).to.equal('number A:? -> A:? number');
         });
 
         it('should infer type of expected array', () => {
