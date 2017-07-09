@@ -59,8 +59,15 @@ describe('unwrap operator types', () => {
                     1: {type: null},
                     2: {type: 'number'}
                 }
+            },
+            'duplicate': {
+                input: [0],
+                output: [0, 0],
+                types: {
+                    0: {type: null}
+                }
             }
-        };
+        }
     });
 
     it('should provide unwrap types without wrapped operand', () => {
@@ -84,11 +91,33 @@ describe('unwrap operator types', () => {
         expect(debugOpType2string(type)).to.equal('A:[B:?] number -> B:?');
     });
 
+    it('should provide unwrap types with wrapped operand involving undefined types + operations on them', () => {
+        let e = new Expression('{arr_get} }2:1{ duplicate');
+        let type = e.getType(namespace);
+
+        expect(debugOpType2string(type)).to.equal('A:[B:?] number -> B:? B:?');
+    });
+
     it('should provide unwrap types with wrapped operand involving undefined types and their refinement', () => {
         let e = new Expression('0 {arr_get} }2:1{ 1 add');
         let type = e.getType(namespace);
 
         expect(debugOpType2string(type)).to.equal('[number] -> number');
+    });
+
+    it('should provide unwrap types with wrapped operand involving undefined types + operations on them + refinement', () => {
+        let e = new Expression('{arr_get} }2:1{ duplicate concat');
+        let type = e.getType(namespace);
+
+        expect(debugOpType2string(type)).to.equal('[string] number -> string');
+    });
+
+
+    it('should unwrap wrapped unwraps', () => {
+        let e = new Expression('{}1:1{} }{');
+        let type = e.getType(namespace);
+
+        expect(debugOpType2string(type)).to.equal('A:? -> B:?');
     });
 
 });

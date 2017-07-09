@@ -12,9 +12,12 @@ import {
     analyzeMatchingTokens,
     analyzeDependencies
 } from '../parser/analyze-tokens';
-import {OperatorListType} from './base';
-import {OperandType, OperationType} from "./operands/operand-types";
-import {cleanTypes} from "./operators/run-type-check";
+import {OperationType} from "./operands/operand-types";
+import {cleanTypes} from "./operators/process-types/clean";
+import {OperatorList} from "./operators/operator";
+import {ExecNamespace} from "./exec/namespace";
+import {Stack} from "./exec/stack";
+import execOpList from "./exec/exec-op-list";
 
 export class Expression {
     errors: boolean;
@@ -24,7 +27,7 @@ export class Expression {
     hash: string;
     namedArgs: string[];
     opsUseArgs: boolean;
-    operators: OperatorListType;
+    operators: OperatorList;
     dependencies: string[];
 
     constructor(code: string) {
@@ -55,7 +58,7 @@ export class Expression {
         }
     }
 
-    appliedTypeOperators(args: { [key: string]: number } = {}): OperatorListType {
+    appliedTypeOperators(args: { [key: string]: number } = {}): OperatorList {
         return this.opsUseArgs ? this.operators.map(op => op.appliedTypeWithArgs(args)) : this.operators;
     }
 
@@ -79,5 +82,9 @@ export class Expression {
 
         cleanTypes(main);
         return main;
+    }
+
+    exec(namespace: ExecNamespace): Stack {
+        return execOpList(this.operators, namespace);
     }
 }

@@ -43,6 +43,25 @@ describe('basic operator types', () => {
 
             expect(debugOpType2string(type)).to.equal('string string');
         });
+
+        it('should provide boolean literal type', () => {
+            let e = new Expression('true false');
+            let type = e.getType({});
+            expect(type).to.deep.eq({
+                input: [],
+                output: [0, 1],
+                types: {
+                    0: {
+                        type: 'boolean'
+                    },
+                    1: {
+                        type: 'boolean'
+                    }
+                }
+            });
+
+            expect(debugOpType2string(type)).to.equal('boolean boolean');
+        });
     });
 
     describe('arrays', () => {

@@ -1,19 +1,22 @@
-import {MultipleTokenOperator} from './operator';
-import {OperatorListType} from '../base';
+import {MultipleTokenOperator, OperatorList} from './operator';
 import {CodeToken} from '../code-token';
 import {OperationType, TypeArity} from "../operands/operand-types";
-import {arityFromSubToMain, pushOutputMemberTypes, runTypeCheck} from "./run-type-check";
+import {arityFromSubToMain} from "./process-types/add-sub-main";
+import {runTypeCheck} from "./process-types/run-type-check";
+import {pushOutputMemberTypes} from "./process-types/basic-ops";
+import {Stack} from "../exec/stack";
+import {ExecNamespace} from "../exec/namespace";
 
 
 export class WrappedOperator extends MultipleTokenOperator {
 
-    expr: OperatorListType;
+    expr: OperatorList;
 
-    cloneWith(appliedItems: OperatorListType[]): MultipleTokenOperator {
+    cloneWith(appliedItems: OperatorList[]): MultipleTokenOperator {
         return new WrappedOperator(this.tokens, appliedItems);
     }
 
-    constructor(tokens: CodeToken[], items: OperatorListType[]) {
+    constructor(tokens: CodeToken[], items: OperatorList[]) {
         super(tokens, items);
         this.expr = items.length > 0 ? items[0] : [];
     }
@@ -27,4 +30,7 @@ export class WrappedOperator extends MultipleTokenOperator {
         });
     }
 
+    exec(stack: Stack, namespace: ExecNamespace): void {
+        throw new Error("not implemented");
+    }
 }

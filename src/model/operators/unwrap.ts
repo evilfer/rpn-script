@@ -1,7 +1,10 @@
 import {SingleTokenOperator} from './operator';
 import {OperationType} from "../operands/operand-types";
 import {CodeToken} from "../code-token";
-import {matchExpectedWrapped, popInputType, popTypeAndMatch, pushType} from "./run-type-check";
+import {popInputType, popTypeAndMatch, pushType} from "./process-types/basic-ops";
+import {matchExpectedWrapped} from "./process-types/match-unwrap";
+import {Stack} from "../exec/stack";
+import {ExecNamespace} from "../exec/namespace";
 
 
 export class UnwrapOperator extends SingleTokenOperator {
@@ -33,5 +36,9 @@ export class UnwrapOperator extends SingleTokenOperator {
             [...type.wrapped.input].reverse().forEach(id => popTypeAndMatch(current, id));
             type.wrapped.output.forEach(id => pushType(current, id));
         }
+    }
+
+    exec(stack: Stack, namespace: ExecNamespace): void {
+        throw new Error("not implemented");
     }
 }

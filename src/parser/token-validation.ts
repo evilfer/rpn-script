@@ -7,6 +7,8 @@ const VALID_REF_REGEX = new RegExp(`^[${VALID_REF_START_CHARS}][${VALID_REF_CHAR
 
 const UNWRAP_REGEX = /^}([0-9]+:[0-9]+)?{$/;
 
+const BOOLEAN_REGEX = /^(:?false|true)$/;
+
 const NUMBER_REGEX = /^-?[0-9]+(\.[0-9]+)?$/;
 
 const STRING_REGEX = /^"/;
@@ -34,6 +36,11 @@ export function validateRefToken(token: CodeToken): boolean {
 export function validateRhsToken(token: CodeToken, namedArgs: string[]): boolean {
     if (BASIC_RHS_TOKENS[token.code]) {
         token.type = BASIC_RHS_TOKENS[token.code];
+        return true;
+    }
+
+    if (token.code.match(BOOLEAN_REGEX)) {
+        token.type = 'boolean';
         return true;
     }
 

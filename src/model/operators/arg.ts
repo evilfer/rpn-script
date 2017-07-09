@@ -1,10 +1,12 @@
-import {SingleTokenOperator} from './operator';
-import {Operator} from '../base';
+import {Operator, SingleTokenOperator} from './operator';
 import {CodeToken} from '../code-token';
-import {OperandType, OperationType} from "../operands/operand-types";
+import {OperationType} from "../operands/operand-types";
+import {ExecNamespace} from "../exec/namespace";
+import {Stack} from "../exec/stack";
 
 
 export class ArgOperator extends SingleTokenOperator {
+
     arg: string;
 
     constructor(token: CodeToken) {
@@ -28,6 +30,10 @@ export class ArgOperator extends SingleTokenOperator {
     applyTypes(current: OperationType, namespace: { [name: string]: OperationType }): void {
         throw new Error('not implemented');
     }
+
+    exec(stack: Stack, namespace: ExecNamespace): void {
+        throw new Error("not implemented");
+    }
 }
 
 
@@ -43,5 +49,9 @@ export abstract class AppliedArgOperator<T> extends SingleTokenOperator {
 export class TypeAppliedArgOperator extends AppliedArgOperator<number> {
     applyTypes(current: OperationType, namespace: { [name: string]: OperationType }): void {
         current.output.push(this.operand);
+    }
+
+    exec(stack: Stack, namespace: ExecNamespace): void {
+        throw new Error("not implemented");
     }
 }

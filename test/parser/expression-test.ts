@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import {Expression} from '../../src/model/expression';
-import {NumberOperator, StringOperator} from "../../src/model/operators/literal";
+import {BooleanOperator, NumberOperator, StringOperator} from "../../src/model/operators/literal";
 import {RefOperator} from "../../src/model/operators/ref";
 import {ArrayOperator} from "../../src/model/operators/comma-sep";
 import {AppliedArgOperator, ArgOperator} from "../../src/model/operators/arg";
@@ -64,6 +64,17 @@ describe('expression parsing', () => {
             let [op] = e.operators;
             expect(op.constructor.name).to.equal('StringOperator');
             expect((<StringOperator>op).value).to.equal('a');
+        });
+
+        it('should create boolean operators', () => {
+            let e = new Expression('false true');
+            expect(e.errors).to.be.false;
+            expect(e.operators.length).to.equal(2);
+            let [f, t] = e.operators;
+            expect(f.constructor.name).to.equal('BooleanOperator');
+            expect(t.constructor.name).to.equal('BooleanOperator');
+            expect((<BooleanOperator>f).value).to.equal(false);
+            expect((<BooleanOperator>t).value).to.equal(true);
         });
 
         it('should create number operator', () => {

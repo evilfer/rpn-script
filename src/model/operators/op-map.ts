@@ -4,11 +4,10 @@ import {ArgOperator} from './arg';
 import {RefOperator} from './ref';
 import {WrappedOperator} from './wrap';
 import {UnwrapOperator} from './unwrap';
-import {MultipleTokenOperator, SingleTokenOperator} from "./operator";
+import {MultipleTokenOperator, OperatorList, SingleTokenOperator} from "./operator";
 import {CodeToken} from "../code-token";
-import {OperatorListType} from "../base";
 
-export const MULTIPLE_OPTS: { [key: string]: { (tokens: CodeToken[], items: OperatorListType[]): MultipleTokenOperator } } = {
+export const MULTIPLE_OPTS: { [key: string]: { (tokens: CodeToken[], items: OperatorList[]): MultipleTokenOperator } } = {
     'wrapOpen': (tokens, items) => new WrappedOperator(tokens, items),
     'arrayOpen': (tokens, items) => new ArrayOperator(tokens, items),
     'tupleOpen': (tokens, items) => new TupleOperator(tokens, items)

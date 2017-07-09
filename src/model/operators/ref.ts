@@ -1,7 +1,10 @@
 import {SingleTokenOperator} from './operator';
 import {CodeToken} from '../code-token';
 import {OperationType, TypeArity} from "../operands/operand-types";
-import {arityFromSubToMain, matchTypes} from "./run-type-check";
+import {arityFromSubToMain} from "./process-types/add-sub-main";
+import {matchTypes} from "./process-types/match";
+import {Stack} from "../exec/stack";
+import {ExecNamespace} from "../exec/namespace";
 
 
 export class RefOperator extends SingleTokenOperator {
@@ -38,5 +41,9 @@ export class RefOperator extends SingleTokenOperator {
         let tx: { [id: number]: number } = {};
 
         matches.forEach(([a, b]) => matchTypes(current, tx, a, b));
+    }
+
+    exec(stack: Stack, namespace: ExecNamespace): void {
+        throw new Error("not implemented");
     }
 }

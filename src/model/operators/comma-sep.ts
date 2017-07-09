@@ -1,10 +1,14 @@
-import {MultipleTokenOperator} from './operator';
-import {OperatorListType} from '../base';
+import {MultipleTokenOperator, OperatorList} from './operator';
 import {OperationType, TypeArity} from "../operands/operand-types";
-import {addAnyType, arityFromSubToMain, pushOutputMemberTypes, runTypeCheck} from "./run-type-check";
+import {arityFromSubToMain} from "./process-types/add-sub-main";
+import {runTypeCheck} from "./process-types/run-type-check";
+import {addAnyType, pushOutputMemberTypes} from "./process-types/basic-ops";
+import {Stack} from "../exec/stack";
+import {ExecNamespace} from "../exec/namespace";
+import execOpList from "../exec/exec-op-list";
 
 export class ArrayOperator extends MultipleTokenOperator {
-    cloneWith(appliedItems: OperatorListType[]): MultipleTokenOperator {
+    cloneWith(appliedItems: OperatorList[]): MultipleTokenOperator {
         return new ArrayOperator(this.tokens, appliedItems);
     }
 
@@ -12,7 +16,6 @@ export class ArrayOperator extends MultipleTokenOperator {
         let arrayType: number;
 
         if (this.items.length > 0) {
-
             let arrayArity: TypeArity = arityFromSubToMain(current, runTypeCheck(this.items[0], namespace));
             arrayType = arrayArity.output[0];
         } else {
@@ -24,10 +27,14 @@ export class ArrayOperator extends MultipleTokenOperator {
             array: arrayType
         });
     }
+
+    exec(stack: Stack, namespace: ExecNamespace): void {
+        stack.push({val: this.items.map(item => execOpList(item, namespace)[0])});
+    }
 }
 
 export class TupleOperator extends MultipleTokenOperator {
-    cloneWith(appliedItems: OperatorListType[]): MultipleTokenOperator {
+    cloneWith(appliedItems: OperatorList[]): MultipleTokenOperator {
         return new TupleOperator(this.tokens, appliedItems);
     }
 
@@ -40,6 +47,10 @@ export class TupleOperator extends MultipleTokenOperator {
             type: 'tuple',
             tuple: tupleTypes
         });
+    }
+
+    exec(stack: Stack, namespace: ExecNamespace): void {
+        stack.push({val: this.items.map(item => execOpList(item, namespace)[0])});
     }
 }
 

@@ -1,8 +1,7 @@
 import {RpnError} from '../errors';
 import {CodeToken} from '../code-token';
-import {Operator} from '../base';
-import {OperatorListType} from '../base';
 import {SINGLE_OPTS, MULTIPLE_OPTS} from './op-map';
+import {Operator, OperatorList} from "./operator";
 
 const SEP_ALLOWED: { [key: string]: boolean } = {
     'arrayOpen': true,
@@ -10,8 +9,8 @@ const SEP_ALLOWED: { [key: string]: boolean } = {
     'wrapOpen': false
 };
 
-function parseCommaSep(tokens: CodeToken[], sepAllowed: boolean): OperatorListType[] {
-    let items: OperatorListType[] = [];
+function parseCommaSep(tokens: CodeToken[], sepAllowed: boolean): OperatorList[] {
+    let items: OperatorList[] = [];
     let start = 0;
     let containerLevel = 0;
 
@@ -41,7 +40,7 @@ function parseCommaSep(tokens: CodeToken[], sepAllowed: boolean): OperatorListTy
     return items;
 }
 
-export function createOperators(rhs: CodeToken[]): OperatorListType {
+export function createOperators(rhs: CodeToken[]): OperatorList {
     let operators = [];
 
     for (let i = 0; i < rhs.length; i++) {

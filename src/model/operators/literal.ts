@@ -1,12 +1,12 @@
 import {SingleTokenOperator} from './operator';
 import {CodeToken} from '../code-token';
 import {OperationType} from "../operands/operand-types";
-import {pushOutputMemberTypes} from "./run-type-check";
-//import {TypeCheckContext} from '../base';
-//import {literalType} from '../operands/types';
+import {pushOutputMemberTypes} from "./process-types/basic-ops";
+import {Stack} from "../exec/stack";
+import {ExecNamespace} from "../exec/namespace";
 
+export class LiteralOperator<T extends boolean | number | string> extends SingleTokenOperator {
 
-export class LiteralOperator<T> extends SingleTokenOperator {
     value: T;
     type: 'boolean' | 'number' | 'string';
 
@@ -20,6 +20,10 @@ export class LiteralOperator<T> extends SingleTokenOperator {
         pushOutputMemberTypes(current, {
             type: this.type
         });
+    }
+
+    exec(stack: Stack, namespace: ExecNamespace): void {
+        stack.push({val: this.value});
     }
 }
 
