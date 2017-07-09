@@ -16,10 +16,11 @@ import {OperationType} from "./operands/operand-types";
 import {cleanTypes} from "./operators/process-types/clean";
 import {OperatorList} from "./operators/operator";
 import {ExecNamespace} from "./exec/namespace";
-import {Stack} from "./exec/stack";
+import {Stack, StackValue} from "./exec/stack";
 import execOpList from "./exec/exec-op-list";
+import {Runnable} from "./exec/runnable";
 
-export class Expression {
+export class Expression implements Runnable {
     errors: boolean;
     name: null | string;
     code: string;
@@ -86,5 +87,24 @@ export class Expression {
 
     exec(namespace: ExecNamespace): Stack {
         return execOpList(this.operators, namespace);
+    }
+
+    applyTo(stack: Stack, namespace: ExecNamespace): void {
+        let argMap: { [name: string]: StackValue } = {};
+
+        this.namedArgs.forEach(name => {
+            let arg = stack.pop();
+            if (typeof arg === 'undefined') {
+                throw new Error('missing arg');
+            }
+            argMap[name] = arg;
+        });
+
+        let appliedOps = this.appliedExecOperators(argMap);
+        appliedOps.forEach(operator => operator.exec(stack, namespace));
+    }
+
+    appliedExecOperators(args: { [key: string]: StackValue } = {}): OperatorList {
+        return this.opsUseArgs ? this.operators.map(op => op.appliedExecWithArgs(args)) : this.operators;
     }
 }

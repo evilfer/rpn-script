@@ -31,6 +31,8 @@ export class WrappedOperator extends MultipleTokenOperator {
     }
 
     exec(stack: Stack, namespace: ExecNamespace): void {
-        throw new Error("not implemented");
+        stack.push({
+            val: this.expr
+        });
     }
 }

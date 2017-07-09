@@ -2,7 +2,7 @@ import {Operator, SingleTokenOperator} from './operator';
 import {CodeToken} from '../code-token';
 import {OperationType} from "../operands/operand-types";
 import {ExecNamespace} from "../exec/namespace";
-import {Stack} from "../exec/stack";
+import {Stack, StackValue} from "../exec/stack";
 
 
 export class ArgOperator extends SingleTokenOperator {
@@ -20,6 +20,15 @@ export class ArgOperator extends SingleTokenOperator {
             throw new Error('no arg!');
         } else {
             return new TypeAppliedArgOperator(this.token, args[this.arg]);
+        }
+    }
+
+    appliedExecWithArgs(args: { [key: string]: StackValue }): Operator {
+        let arg: StackValue = args[this.arg];
+        if (typeof arg === 'undefined') {
+            throw new Error('no arg!');
+        } else {
+            return new ExecAppliedArgOperator(this.token, args[this.arg]);
         }
     }
 
@@ -53,5 +62,15 @@ export class TypeAppliedArgOperator extends AppliedArgOperator<number> {
 
     exec(stack: Stack, namespace: ExecNamespace): void {
         throw new Error("not implemented");
+    }
+}
+
+export class ExecAppliedArgOperator extends AppliedArgOperator<StackValue> {
+    applyTypes(current: OperationType, namespace: { [name: string]: OperationType }): void {
+        throw new Error("not implemented");
+    }
+
+    exec(stack: Stack, namespace: ExecNamespace): void {
+        stack.push(this.operand);
     }
 }

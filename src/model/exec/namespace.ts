@@ -1,4 +1,5 @@
+import {Runnable} from "./runnable";
 
 export interface ExecNamespace {
-    [name: string] : null
+    [name: string]: Runnable
 }

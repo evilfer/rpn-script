@@ -5,6 +5,7 @@ import {arityFromSubToMain} from "./process-types/add-sub-main";
 import {matchTypes} from "./process-types/match";
 import {Stack} from "../exec/stack";
 import {ExecNamespace} from "../exec/namespace";
+import {Runnable} from "../exec/runnable";
 
 
 export class RefOperator extends SingleTokenOperator {
@@ -44,6 +45,11 @@ export class RefOperator extends SingleTokenOperator {
     }
 
     exec(stack: Stack, namespace: ExecNamespace): void {
-        throw new Error("not implemented");
+        let runnable: Runnable = namespace[this.ref];
+        if (!runnable) {
+            throw new Error('bad ref');
+        }
+
+        runnable.applyTo(stack, namespace);
     }
 }

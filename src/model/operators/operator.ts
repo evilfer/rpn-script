@@ -1,7 +1,7 @@
 import {CodeToken} from '../code-token';
 import {OperationType} from "../operands/operand-types";
 import {RpnError} from "../errors";
-import {Stack} from "../exec/stack";
+import {Stack, StackValue} from "../exec/stack";
 import {ExecNamespace} from "../exec/namespace";
 
 export type OperatorList = Operator[];
@@ -14,6 +14,10 @@ export abstract class Operator {
     }
 
     appliedTypeWithArgs(args: { [key: string]: number }): Operator {
+        return this;
+    }
+
+    appliedExecWithArgs(args: { [key: string]: StackValue }): Operator {
         return this;
     }
 
@@ -61,6 +65,19 @@ export abstract class MultipleTokenOperator extends Operator {
 
         let appliedItems: OperatorList[] = this.items.map((item, i) => this.childrenRequireArgs[i] ?
             item.map(op => op.appliedTypeWithArgs(args)) :
+            item
+        );
+
+        return this.cloneWith(appliedItems);
+    }
+
+    appliedExecWithArgs(args: { [key: string]: StackValue }): MultipleTokenOperator {
+        if (!this.argsRequired) {
+            return this;
+        }
+
+        let appliedItems: OperatorList[] = this.items.map((item, i) => this.childrenRequireArgs[i] ?
+            item.map(op => op.appliedExecWithArgs(args)) :
             item
         );
 
