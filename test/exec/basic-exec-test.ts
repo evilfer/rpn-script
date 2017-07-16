@@ -1,91 +1,89 @@
-import {expect} from 'chai';
-import {Expression} from '../../src/model/expression';
+import {expect} from "chai";
+import {Expression} from "../../src/model/expression";
+import {NumberOperator} from "../../src/model/operators/literal/number";
 import {OperatorList} from "../../src/model/operators/operator";
-import {NumberOperator} from "../../src/model/operators/literal";
+import {execTest} from "./utils";
 
-import {execTest} from './utils';
+describe("basic operator exec", () => {
+    describe("literal types", () => {
 
-
-describe('basic operator exec', () => {
-    describe('literal types', () => {
-
-        it('should provide number literal type', () => {
-            execTest('1 2.5', {}, [
+        it("should provide number literal type", () => {
+            execTest("1 2.5", {}, [
                 1,
-                2.5
+                2.5,
             ]);
         });
 
-        it('should provide string literal type', () => {
+        it("should provide string literal type", () => {
             execTest('"a" "3"', {}, [
-                'a',
-                '3'
+                "a",
+                "3",
             ]);
         });
 
-        it('should provide boolean literal type', () => {
-            execTest('true false', {}, [
+        it("should provide boolean literal type", () => {
+            execTest("true false", {}, [
                 true,
-                false
+                false,
             ]);
         });
     });
 
-    describe('arrays', () => {
-        it('should provide untyped array', () => {
-            execTest('[]', {}, [
-                []
+    describe("arrays", () => {
+        it("should provide untyped array", () => {
+            execTest("[]", {}, [
+                [],
             ]);
         });
 
-        it('should provide literal type array', () => {
-            execTest('[1]', {}, [
-                [1]
+        it("should provide literal type array", () => {
+            execTest("[1]", {}, [
+                [1],
             ]);
         });
 
-        it('should provide multiple literal type array', () => {
+        it("should provide multiple literal type array", () => {
             execTest('["1", "2"]', {}, [
-                ['1', '2']
+                ["1", "2"],
             ]);
         });
 
-        it('should handle nested arrays', () => {
-            execTest('[[]]', {}, [
-                [[]]
+        it("should handle nested arrays", () => {
+            execTest("[[]]", {}, [
+                [[]],
             ]);
         });
     });
 
-    describe('tuples', () => {
-        it('should provide empty tuple', () => {
-            execTest('()', {}, [
-                []
+    describe("tuples", () => {
+        it("should provide empty tuple", () => {
+            execTest("()", {}, [
+                [],
             ]);
         });
 
-        it('should provide literal tuple', () => {
+        it("should provide literal tuple", () => {
             execTest('(1, "1")', {}, [
-                [1, '1']
+                [1, "1"],
             ]);
         });
     });
 
-    describe('wrapped', () => {
-        it('should provide empty wrapped operators', () => {
-            execTest('{}', {}, [
-                []
+    describe("wrapped", () => {
+        it("should provide empty wrapped operators", () => {
+            execTest("{}", {}, [
+                [],
             ]);
         });
 
-        it('should provide literal wrapped operators', () => {
-            let e = new Expression('{1}');
-            let result = e.exec({});
-            let [{val}] = result;
+        it("should provide literal wrapped operators", () => {
+            const e = new Expression("{1}");
+            const result = e.exec({});
+            const [{val}] = result;
 
-            expect(val).to.be.an('array');
+            expect(val).to.be.an("array");
             expect(val).to.have.length(1);
-            expect((<OperatorList> val)[0].constructor).to.equal(NumberOperator);
+            expect((val as OperatorList)[0].constructor).to.equal(NumberOperator);
         });
     });
 });

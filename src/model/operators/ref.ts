@@ -1,34 +1,33 @@
-import {SingleTokenOperator} from './operator';
-import {CodeToken} from '../code-token';
+import {CodeToken} from "../code-token";
+import {ExecNamespace} from "../exec/namespace";
+import {Runnable} from "../exec/runnable";
+import {Stack} from "../exec/stack";
 import {OperationType, TypeArity} from "../operands/operand-types";
 import {arityFromSubToMain} from "./process-types/add-sub-main";
 import {matchTypes} from "./process-types/match";
-import {Stack} from "../exec/stack";
-import {ExecNamespace} from "../exec/namespace";
-import {Runnable} from "../exec/runnable";
-
+import {SingleTokenOperator} from "./single-token-operator";
 
 export class RefOperator extends SingleTokenOperator {
-    ref: string;
+    public ref: string;
 
     constructor(token: CodeToken) {
         super(token);
         this.ref = token.code;
     }
 
-    applyTypes(current: OperationType, namespace: { [p: string]: OperationType }): void {
+    public applyTypes(current: OperationType, namespace: { [p: string]: OperationType }): void {
         if (!namespace[this.ref]) {
             throw new Error(`${this.ref} does not exist`);
         }
 
-        let type: OperationType = namespace[this.ref];
-        let arity: TypeArity = arityFromSubToMain(current, type);
+        const type: OperationType = namespace[this.ref];
+        const arity: TypeArity = arityFromSubToMain(current, type);
 
-        let matches: [number, number][] = [];
+        const matches: Array<[number, number]> = [];
 
         [...arity.input].reverse().forEach(tid => {
             if (current.output.length > 0) {
-                let matched = <number> current.output.pop();
+                const matched = current.output.pop() as number;
                 if (matched !== tid) {
                     matches.push([matched, tid]);
                 }
@@ -39,15 +38,15 @@ export class RefOperator extends SingleTokenOperator {
 
         arity.output.forEach(tid => current.output.push(tid));
 
-        let tx: { [id: number]: number } = {};
+        const tx: { [id: number]: number } = {};
 
         matches.forEach(([a, b]) => matchTypes(current, tx, a, b));
     }
 
-    exec(stack: Stack, namespace: ExecNamespace): void {
-        let runnable: Runnable = namespace[this.ref];
+    public exec(stack: Stack, namespace: ExecNamespace): void {
+        const runnable: Runnable = namespace[this.ref];
         if (!runnable) {
-            throw new Error('bad ref');
+            throw new Error("bad ref");
         }
 
         runnable.applyTo(stack, namespace);

@@ -1,27 +1,27 @@
-import {CodeToken} from '../model/code-token';
-import {newCodeToken} from '../model/code-token';
+import {CodeToken} from "../model/code-token";
+import {newCodeToken} from "../model/code-token";
 import {RpnError} from "../model/errors";
 
-const STRING_ESCAPED: string[] = ['\\\\n', '\\\\"', '\\\\\\\\', '"'];
+const STRING_ESCAPED: string[] = ["\\\\n", '\\\\"', "\\\\\\\\", '"'];
 
-const REGEX: RegExp = new RegExp(`(${STRING_ESCAPED.join('|')})`);
+const REGEX: RegExp = new RegExp(`(${STRING_ESCAPED.join("|")})`);
 
 function findString(code: string): null | [string, string, boolean, string] {
-    let index = code.indexOf('"');
+    const index = code.indexOf('"');
     if (index < 0) {
         return null;
     }
 
-    let prev = code.slice(0, index);
-    let string = '"';
+    const prev = code.slice(0, index);
+    let str = '"';
     let rest = code.slice(index + 1);
     let match;
     let ended = false;
 
     while (match = rest.match(REGEX)) {
         // $FlowFixMe
-        let matchString = rest.slice(0, match.index) + match[0];
-        string += matchString;
+        const matchString = rest.slice(0, match.index) + match[0];
+        str += matchString;
         rest = rest.slice(matchString.length);
         if (match[0] === '"') {
             ended = true;
@@ -30,21 +30,20 @@ function findString(code: string): null | [string, string, boolean, string] {
     }
 
     if (!ended) {
-        string += rest;
-        rest = '';
+        str += rest;
+        rest = "";
     }
 
-    return [prev, string, ended, rest];
+    return [prev, str, ended, rest];
 }
 
-
 function parseOtherTokens(expr: string, exprPosition: number, tokens: CodeToken[]): void {
-    let regex = /[^\s]+/g;
+    const regex = /[^\s]+/g;
     let match;
 
     while (match = regex.exec(expr)) {
         // $FlowFixMe
-        let index = match.index;
+        const index = match.index;
 
         splitSpecialTokens(match[0], exprPosition + index, tokens);
     }
@@ -55,7 +54,7 @@ function splitSpecialTokens(token: string, tokenPosition: number, tokens: CodeTo
     let remaining = token;
 
     while (match = remaining.match(/}([0-9]+:[0-9]+)?{|{|}|\)([0-9]+:[0-9]+)?\(|\(|\)|\[|]|,/)) {
-        let index = <number> match.index;
+        const index = match.index as number;
         if (index > 0) {
             tokens.push(newCodeToken(remaining.slice(0, index), tokens.length, tokenPosition));
         }
@@ -70,17 +69,17 @@ function splitSpecialTokens(token: string, tokenPosition: number, tokens: CodeTo
 }
 
 export default function parseTokens(expr: string): CodeToken[] {
-    let tokens: CodeToken[] = [];
+    const tokens: CodeToken[] = [];
     let rest = expr;
     let stringFind;
     let restPosition = 0;
 
     while (stringFind = findString(rest)) {
-        let [prev, string, ended, next] = stringFind;
+        const [prev, string, ended, next] = stringFind;
         parseOtherTokens(prev, restPosition, tokens);
-        let stringToken = newCodeToken(string, tokens.length, restPosition + prev.length);
+        const stringToken = newCodeToken(string, tokens.length, restPosition + prev.length);
         if (!ended) {
-            stringToken.errors.push(new RpnError('unterminated_string'));
+            stringToken.errors.push(new RpnError("unterminated_string"));
         }
         tokens.push(stringToken);
         restPosition += prev.length + string.length;
@@ -91,4 +90,3 @@ export default function parseTokens(expr: string): CodeToken[] {
 
     return tokens;
 }
-

@@ -1,24 +1,27 @@
 {
-    "name": "rpn-script",
-    "version": "1.0.0",
-    "description": "",
-    "main": "index.js",
-    "directories": {
-        "test": "test"
-    },
-    "scripts": {
-        "build": "tsc -p tsconfig-build.json",
-        "test": "mocha --require ts-node/register test/**/*-test.ts"
-    },
-    "author": "",
-    "license": "ISC",
-    "devDependencies": {
-        "chai": "4.0.2",
-        "gulp": "3.9.1",
-        "gulp-typescript": "3.2.0",
-        "mocha": "3.4.2",
-        "ts-node": "3.2.0",
-        "typescript": "2.4.1"
-    },
-    "dependencies": {}
+  "name": "rpn-script",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig-build.json",
+    "test": "mocha --require ts-node/register test/**/*-test.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/chai": "4.0.1",
+    "@types/mocha": "2.2.41",
+    "chai": "4.1.0",
+    "gulp": "3.9.1",
+    "gulp-typescript": "3.2.1",
+    "mocha": "3.4.2",
+    "ts-node": "3.2.0",
+    "tslint": "^5.5.0",
+    "typescript": "2.4.1"
+  },
+  "dependencies": {}
 }

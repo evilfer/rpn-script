@@ -1,123 +1,122 @@
-import {expect} from 'chai';
-import {Expression} from '../../src/model/expression';
+import {expect} from "chai";
+import {Expression} from "../../src/model/expression";
 import debugOpType2string from "../../src/model/operands/debug-operation-type-to-string";
 import {OperationType} from "../../src/model/operands/operand-types";
 
-describe('unwrap operator types', () => {
+describe("unwrap operator types", () => {
     let namespace: { [name: string]: OperationType };
 
     beforeEach(() => {
         namespace = {
-            's': {
-                input: [],
-                output: [0],
-                types: {
-                    0: {type: 'string'}
-                }
-            },
-            'n': {
-                input: [],
-                output: [0],
-                types: {
-                    0: {type: 'number'}
-                }
-            },
-            'add': {
+            add: {
                 input: [0, 1],
                 output: [2],
                 types: {
-                    0: {type: 'number'},
-                    1: {type: 'number'},
-                    2: {type: 'number'}
-                }
+                    0: {type: "number"},
+                    1: {type: "number"},
+                    2: {type: "number"},
+                },
             },
-            'concat': {
-                input: [0, 1],
-                output: [2],
-                types: {
-                    0: {type: 'string'},
-                    1: {type: 'string'},
-                    2: {type: 'string'}
-                }
-            },
-            'switch': {
-                input: [0, 1],
-                output: [1, 0],
-                types: {
-                    0: {type: null},
-                    1: {type: null}
-                }
-            },
-            'arr_get': {
+            arr_get: {
                 input: [0, 2],
                 output: [1],
                 types: {
                     0: {
-                        type: 'array',
-                        array: 1
+                        array: 1,
+                        type: "array",
                     },
                     1: {type: null},
-                    2: {type: 'number'}
-                }
+                    2: {type: "number"},
+                },
             },
-            'duplicate': {
+            concat: {
+                input: [0, 1],
+                output: [2],
+                types: {
+                    0: {type: "string"},
+                    1: {type: "string"},
+                    2: {type: "string"},
+                },
+            },
+            duplicate: {
                 input: [0],
                 output: [0, 0],
                 types: {
-                    0: {type: null}
-                }
-            }
-        }
+                    0: {type: null},
+                },
+            },
+            n: {
+                input: [],
+                output: [0],
+                types: {
+                    0: {type: "number"},
+                },
+            },
+            s: {
+                input: [],
+                output: [0],
+                types: {
+                    0: {type: "string"},
+                },
+            },
+            switch2: {
+                input: [0, 1],
+                output: [1, 0],
+                types: {
+                    0: {type: null},
+                    1: {type: null},
+                },
+            },
+        };
     });
 
-    it('should provide unwrap types without wrapped operand', () => {
-        let e = new Expression('}1:2{');
-        let type = e.getType({});
+    it("should provide unwrap types without wrapped operand", () => {
+        const e = new Expression("}1:2{");
+        const type = e.getType({});
 
-        expect(debugOpType2string(type)).to.equal('A:? -> B:? C:?');
+        expect(debugOpType2string(type)).to.equal("A:? -> B:? C:?");
     });
 
-    it('should provide unwrap types with wrapped operand', () => {
-        let e = new Expression('{add} }2:1{');
-        let type = e.getType(namespace);
+    it("should provide unwrap types with wrapped operand", () => {
+        const e = new Expression("{add} }2:1{");
+        const type = e.getType(namespace);
 
-        expect(debugOpType2string(type)).to.equal('number number -> number');
+        expect(debugOpType2string(type)).to.equal("number number -> number");
     });
 
-    it('should provide unwrap types with wrapped operand involving undefined types', () => {
-        let e = new Expression('{arr_get} }2:1{');
-        let type = e.getType(namespace);
+    it("should provide unwrap types with wrapped operand involving undefined types", () => {
+        const e = new Expression("{arr_get} }2:1{");
+        const type = e.getType(namespace);
 
-        expect(debugOpType2string(type)).to.equal('A:[B:?] number -> B:?');
+        expect(debugOpType2string(type)).to.equal("A:[B:?] number -> B:?");
     });
 
-    it('should provide unwrap types with wrapped operand involving undefined types + operations on them', () => {
-        let e = new Expression('{arr_get} }2:1{ duplicate');
-        let type = e.getType(namespace);
+    it("should provide unwrap types with wrapped operand involving undefined types + operations on them", () => {
+        const e = new Expression("{arr_get} }2:1{ duplicate");
+        const type = e.getType(namespace);
 
-        expect(debugOpType2string(type)).to.equal('A:[B:?] number -> B:? B:?');
+        expect(debugOpType2string(type)).to.equal("A:[B:?] number -> B:? B:?");
     });
 
-    it('should provide unwrap types with wrapped operand involving undefined types and their refinement', () => {
-        let e = new Expression('0 {arr_get} }2:1{ 1 add');
-        let type = e.getType(namespace);
+    it("should provide unwrap types with wrapped operand involving undefined types and their refinement", () => {
+        const e = new Expression("0 {arr_get} }2:1{ 1 add");
+        const type = e.getType(namespace);
 
-        expect(debugOpType2string(type)).to.equal('[number] -> number');
+        expect(debugOpType2string(type)).to.equal("[number] -> number");
     });
 
-    it('should provide unwrap types with wrapped operand involving undefined types + operations on them + refinement', () => {
-        let e = new Expression('{arr_get} }2:1{ duplicate concat');
-        let type = e.getType(namespace);
+    it("should provide unwrap types with wrapped operand involving undefined types + operations + refinement", () => {
+        const e = new Expression("{arr_get} }2:1{ duplicate concat");
+        const type = e.getType(namespace);
 
-        expect(debugOpType2string(type)).to.equal('[string] number -> string');
+        expect(debugOpType2string(type)).to.equal("[string] number -> string");
     });
 
+    it("should unwrap wrapped unwraps", () => {
+        const e = new Expression("{}1:1{} }{");
+        const type = e.getType(namespace);
 
-    it('should unwrap wrapped unwraps', () => {
-        let e = new Expression('{}1:1{} }{');
-        let type = e.getType(namespace);
-
-        expect(debugOpType2string(type)).to.equal('A:? -> B:?');
+        expect(debugOpType2string(type)).to.equal("A:? -> B:?");
     });
 
 });

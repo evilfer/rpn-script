@@ -1,125 +1,118 @@
 import {expect} from "chai";
-import {Expression} from '../../src/model/expression';
-import debugOpType2string from "../../src/model/operands/debug-operation-type-to-string";
 import {ExecNamespace} from "../../src/model/exec/namespace";
 import {Stack} from "../../src/model/exec/stack";
-import {execTest} from './utils';
+import {Expression} from "../../src/model/expression";
 import {RefOperator} from "../../src/model/operators/ref";
+import {execTest, popTwo} from "./utils";
 
-function popTwo(stack: Stack): any[] {
-    let b = stack.pop();
-    let a = stack.pop();
-    return [a && a.val, b && b.val];
-}
-
-describe('expression ref operator types', () => {
+describe("expression ref operator types", () => {
     let namespace: ExecNamespace;
 
     beforeEach(() => {
         namespace = {
-            's': {
-                applyTo: (stack: Stack, namespace: ExecNamespace) => {
-                    stack.push({val: 'hi world'});
-                }
+            add: {
+                applyTo: (stack: Stack) => {
+                    const [a, b] = popTwo(stack);
+                    stack.push({val: a + b});
+                },
             },
-            'n': {
-                applyTo: (stack: Stack, namespace: ExecNamespace) => {
+            arr_get: {
+                applyTo: (stack: Stack) => {
+                    const [a, b] = popTwo(stack);
+                    stack.push({val: a[b]});
+                },
+            },
+            concat: {
+                applyTo: (stack: Stack) => {
+                    const [a, b] = popTwo(stack);
+                    stack.push({val: a + b});
+                },
+            },
+            n: {
+                applyTo: (stack: Stack) => {
                     stack.push({val: 3.14});
-                }
+                },
             },
-            'add': {
-                applyTo: (stack: Stack, namespace: ExecNamespace) => {
-                    let [a, b] = popTwo(stack);
-                    stack.push({val: a + b});
-                }
+            s: {
+                applyTo: (stack: Stack) => {
+                    stack.push({val: "hi world"});
+                },
             },
-            'subtract': {
-                applyTo: (stack: Stack, namespace: ExecNamespace) => {
-                    let [a, b] = popTwo(stack);
+            subtract: {
+                applyTo: (stack: Stack) => {
+                    const [a, b] = popTwo(stack);
                     stack.push({val: a - b});
-                }
+                },
             },
-            'concat': {
-                applyTo: (stack: Stack, namespace: ExecNamespace) => {
-                    let [a, b] = popTwo(stack);
-                    stack.push({val: a + b});
-                }
-            },
-            'switch': {
-                applyTo: (stack: Stack, namespace: ExecNamespace) => {
-                    let [a, b] = popTwo(stack);
+            switch2: {
+                applyTo: (stack: Stack) => {
+                    const [a, b] = popTwo(stack);
                     stack.push({val: b});
                     stack.push({val: a});
-                }
+                },
             },
-            'arr_get': {
-                applyTo: (stack: Stack, namespace: ExecNamespace) => {
-                    let [a, b] = popTwo(stack);
-                    stack.push({val: a[b]});
-                }
-            }
         };
     });
 
-    describe('literal types', () => {
-        it('should apply literal expr', () => {
-            execTest('s', namespace, [
-                'hi world'
+    describe("literal types", () => {
+        it("should apply literal expr", () => {
+            execTest("s", namespace, [
+                "hi world",
             ]);
         });
 
-        it('should apply multiple expr', () => {
-            execTest('s n', namespace, [
-                'hi world',
-                3.14
+        it("should apply multiple expr", () => {
+            execTest("s n", namespace, [
+                "hi world",
+                3.14,
             ]);
         });
 
-        it('should use expressions in arrays', () => {
-            execTest('[s]', namespace, [
-                ['hi world']
+        it("should use expressions in arrays", () => {
+            execTest("[s]", namespace, [
+                ["hi world"],
             ]);
         });
 
-        it('should use expressions in wraps', () => {
-            let e = new Expression('{s n}');
-            let result = e.exec(namespace);
-            let [wrapped] = result;
-            let [o1, o2] = <any[]> wrapped.val;
+        it("should use expressions in wraps", () => {
+            const e = new Expression("{s n}");
+            const result = e.exec(namespace);
+            const [wrapped] = result;
+            const [o1, o2] = wrapped.val as any[];
             expect(o1.constructor).to.equal(RefOperator);
-            expect(o1.ref).to.equal('s');
+            expect(o1.ref).to.equal("s");
             expect(o2.constructor).to.equal(RefOperator);
-            expect(o2.ref).to.equal('n');
+            expect(o2.ref).to.equal("n");
         });
 
-        it('should use expressions in tuples', () => {
-            execTest('(n, s, n)', namespace, [
-                [3.14, 'hi world', 3.14]
+        it("should use expressions in tuples", () => {
+            execTest("(n, s, n)", namespace, [
+                [3.14, "hi world", 3.14],
             ]);
         });
     });
 
-    describe('function types', () => {
-        it('should apply function expr', () => {
-            execTest('1 2 add', namespace, [
-                3
+    describe("function types", () => {
+        it("should apply function expr", () => {
+            execTest("1 2 add", namespace, [
+                3,
             ]);
         });
-        it('should combine function expr', () => {
-            execTest('1 2 3 add add', namespace, [
-                6
-            ]);
-        });
-
-        it('should get params in right order', () => {
-            execTest('1 2 subtract', namespace, [
-                -1
+        it("should combine function expr", () => {
+            execTest("1 2 3 add add", namespace, [
+                6,
             ]);
         });
 
-        it('should combine ops correctly', () => {
-            execTest('1 2 switch subtract', namespace, [
-                1
+        it("should get params in right order", () => {
+            execTest("1 2 subtract", namespace, [
+                -1,
+            ]);
+        });
+
+        it("should combine ops correctly", () => {
+            execTest("1 2 switch2 subtract", namespace, [
+                1,
             ]);
         });
     });

@@ -1,11 +1,10 @@
 import {OperatorList} from "../operators/operator";
+import execOpListOn from "./exec-on";
 import {ExecNamespace} from "./namespace";
 import {Stack} from "./stack";
 
 export default function execOpList(ops: OperatorList, namespace: ExecNamespace): Stack {
-    let stack: Stack = [];
-    ops.forEach(operator => {
-        return operator.exec(stack, namespace);
-    });
+    const stack: Stack = [];
+    execOpListOn(ops, namespace, stack);
     return stack;
 }

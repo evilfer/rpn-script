@@ -1,5 +1,5 @@
 import {expect} from "chai";
-import {StackValue} from "../../src/model/exec/stack";
+import {Stack, StackValue} from "../../src/model/exec/stack";
 import {ExecNamespace} from "../../src/model/exec/namespace";
 import {Expression} from "../../src/model/expression";
 
@@ -18,4 +18,10 @@ export function execTest(code: string, namespace: ExecNamespace, expected: any[]
     let result = e.exec(namespace);
 
     expect(result.map(deVal)).to.deep.eq(expected);
+}
+
+export function popTwo(stack: Stack): any[] {
+    let b = stack.pop();
+    let a = stack.pop();
+    return [a && a.val, b && b.val];
 }

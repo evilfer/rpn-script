@@ -1,17 +1,19 @@
 import {OperandType, OperationType, TypeArity} from "../../operands/operand-types";
 import {nextId} from "./next-id";
 
-
-function addTypeFromSubToMain(main: OperationType, sub: OperationType, tx: { [id: number]: number }, id: number): number {
-    if (typeof tx[id] === 'number') {
+function addTypeFromSubToMain(main: OperationType,
+                              sub: OperationType,
+                              tx: { [id: number]: number },
+                              id: number): number {
+    if (typeof tx[id] === "number") {
         return tx[id];
     } else {
-        let nid = nextId(main);
+        const nid = nextId(main);
         tx[id] = nid;
-        let newType: OperandType = {...sub.types[id]};
+        const newType: OperandType = {...sub.types[id]};
         main.types[nid] = newType;
 
-        if (typeof newType.array === 'number') {
+        if (typeof newType.array === "number") {
             newType.array = addTypeFromSubToMain(main, sub, tx, newType.array);
         }
         if (newType.tuple) {
@@ -24,10 +26,13 @@ function addTypeFromSubToMain(main: OperationType, sub: OperationType, tx: { [id
     }
 }
 
-function addTypesFromSubToMain(main: OperationType, sub: OperationType, tx: { [id: number]: number }, arity: TypeArity): TypeArity {
+function addTypesFromSubToMain(main: OperationType,
+                               sub: OperationType,
+                               tx: { [id: number]: number },
+                               arity: TypeArity): TypeArity {
     return {
         input: arity.input.map(id => addTypeFromSubToMain(main, sub, tx, id)),
-        output: arity.output.map(id => addTypeFromSubToMain(main, sub, tx, id))
+        output: arity.output.map(id => addTypeFromSubToMain(main, sub, tx, id)),
     };
 }
 

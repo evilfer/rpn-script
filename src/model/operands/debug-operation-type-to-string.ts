@@ -1,9 +1,9 @@
-import {OperationType, OperandType, TypeArity} from './operand-types';
+import {OperandType, OperationType, TypeArity} from "./operand-types";
 
-const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 function idOf(i: number): string {
-    return (i >= LETTERS.length ? idOf(Math.floor(i / LETTERS.length)) : '') + LETTERS[i % LETTERS.length];
+    return (i >= LETTERS.length ? idOf(Math.floor(i / LETTERS.length)) : "") + LETTERS[i % LETTERS.length];
 }
 
 function arityIsUndefined(types: { [id: number]: OperandType }, arity: TypeArity): boolean {
@@ -12,15 +12,15 @@ function arityIsUndefined(types: { [id: number]: OperandType }, arity: TypeArity
 }
 
 function isUndefined(types: { [id: number]: OperandType }, id: number): boolean {
-    let ot: OperandType = types[id];
+    const ot: OperandType = types[id];
     switch (ot.type) {
         case null:
             return true;
-        case 'array':
+        case "array":
             return isUndefined(types, ot.array || 0);
-        case 'tuple':
+        case "tuple":
             return !ot.tuple || ot.tuple.some(a => isUndefined(types, a));
-        case 'wrapped':
+        case "wrapped":
             return !ot.wrapped || arityIsUndefined(types, ot.wrapped);
         default:
             return false;
@@ -28,12 +28,12 @@ function isUndefined(types: { [id: number]: OperandType }, id: number): boolean 
 }
 
 function typeName(types: { [id: number]: OperandType }, nameMap: { [id: number]: string }, id: number): null | string {
-    if (typeof nameMap[id] === 'string') {
+    if (typeof nameMap[id] === "string") {
         return nameMap[id];
     }
 
     if (isUndefined(types, id)) {
-        let name = idOf(Object.keys(nameMap).length);
+        const name = idOf(Object.keys(nameMap).length);
         nameMap[id] = name;
         return name;
     }
@@ -42,20 +42,20 @@ function typeName(types: { [id: number]: OperandType }, nameMap: { [id: number]:
 }
 
 function typeStr(types: { [id: number]: OperandType }, nameMap: { [id: number]: string }, id: number): string {
-    let ot: OperandType = types[id];
+    const ot: OperandType = types[id];
     switch (ot.type) {
         case null:
-            return '?';
-        case 'array': {
-            let innerType = type2string(types, nameMap, ot.array || 0);
+            return "?";
+        case "array": {
+            const innerType = type2string(types, nameMap, ot.array || 0);
             return `[${innerType}]`;
         }
-        case 'tuple': {
-            let innerTypes = ot.tuple ? ot.tuple.map(a => type2string(types, nameMap, a)).join(', ') : '-';
+        case "tuple": {
+            const innerTypes = ot.tuple ? ot.tuple.map(a => type2string(types, nameMap, a)).join(", ") : "-";
             return `(${innerTypes})`;
         }
-        case 'wrapped': {
-            let innerType = ot.wrapped ? arity2string(types, nameMap, ot.wrapped) : '-';
+        case "wrapped": {
+            const innerType = ot.wrapped ? arity2string(types, nameMap, ot.wrapped) : "-";
             return `{${innerType}}`;
         }
         default:
@@ -64,18 +64,20 @@ function typeStr(types: { [id: number]: OperandType }, nameMap: { [id: number]: 
 }
 
 function type2string(types: { [id: number]: OperandType }, nameMap: { [id: number]: string }, id: number) {
-    let name = typeName(types, nameMap, id);
-    let str = typeStr(types, nameMap, id);
+    const name = typeName(types, nameMap, id);
+    const str = typeStr(types, nameMap, id);
     return name ? `${name}:${str}` : str;
 }
 
 function list2string(types: { [id: number]: OperandType }, nameMap: { [id: number]: string }, list: number[]): string {
-    return list.map(type => type2string(types, nameMap, type)).join(' ');
+    return list.map(type => type2string(types, nameMap, type)).join(" ");
 }
 
-function arity2string(types: { [id: number]: OperandType }, nameMap: { [id: number]: string }, arity: TypeArity): string {
-    let input = list2string(types, nameMap, arity.input);
-    let output = list2string(types, nameMap, arity.output);
+function arity2string(types: { [id: number]: OperandType },
+                      nameMap: { [id: number]: string },
+                      arity: TypeArity): string {
+    const input = list2string(types, nameMap, arity.input);
+    const output = list2string(types, nameMap, arity.output);
 
     if (input.length > 0) {
         return `${input} -> ${output}`;
@@ -85,7 +87,7 @@ function arity2string(types: { [id: number]: OperandType }, nameMap: { [id: numb
 }
 
 export default function debugOpType2string(type: OperationType): string {
-    let nameMap: { [id: number]: string } = {};
+    const nameMap: { [id: number]: string } = {};
 
     return arity2string(type.types, nameMap, type);
 }

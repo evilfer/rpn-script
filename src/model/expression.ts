@@ -1,45 +1,43 @@
-// @flow
-
-import {CodeToken} from './code-token';
-import {createOperators} from './operators/create-operator';
-import parseTokens from '../parser/parse-tokens';
 import {
-    splitTokens,
+    analyzeDependencies,
+    analyzeEq,
+    analyzeMatchingTokens,
     analyzeName,
     analyzeNamedArgs,
-    analyzeEq,
     analyzeRhs,
-    analyzeMatchingTokens,
-    analyzeDependencies
-} from '../parser/analyze-tokens';
-import {OperationType} from "./operands/operand-types";
-import {cleanTypes} from "./operators/process-types/clean";
-import {OperatorList} from "./operators/operator";
-import {ExecNamespace} from "./exec/namespace";
-import {Stack, StackValue} from "./exec/stack";
+    splitTokens,
+} from "../parser/analyze-tokens";
+import parseTokens from "../parser/parse-tokens";
+import {CodeToken} from "./code-token";
 import execOpList from "./exec/exec-op-list";
+import {ExecNamespace} from "./exec/namespace";
 import {Runnable} from "./exec/runnable";
+import {Stack, StackValue} from "./exec/stack";
+import {OperationType} from "./operands/operand-types";
+import {createOperators} from "./operators/create-operator";
+import {OperatorList} from "./operators/operator";
+import {cleanTypes} from "./operators/process-types/clean";
 
 export class Expression implements Runnable {
-    errors: boolean;
-    name: null | string;
-    code: string;
-    tokens: CodeToken[];
-    hash: string;
-    namedArgs: string[];
-    opsUseArgs: boolean;
-    operators: OperatorList;
-    dependencies: string[];
+    public errors: boolean;
+    public name: null | string;
+    public code: string;
+    public tokens: CodeToken[];
+    public hash: string;
+    public namedArgs: string[];
+    public opsUseArgs: boolean;
+    public operators: OperatorList;
+    public dependencies: string[];
 
     constructor(code: string) {
         this.errors = false;
         this.code = code;
 
-        let tokens: CodeToken[] = parseTokens(code);
+        const tokens: CodeToken[] = parseTokens(code);
         this.tokens = tokens;
-        this.hash = tokens.map(({code}) => code).join(' ');
+        this.hash = tokens.map(token => token.code).join(" ");
 
-        let {lhs, rhs, eq} = splitTokens(tokens);
+        const {lhs, rhs, eq} = splitTokens(tokens);
         analyzeEq(lhs, eq);
 
         this.name = analyzeName(lhs);
@@ -59,18 +57,18 @@ export class Expression implements Runnable {
         }
     }
 
-    appliedTypeOperators(args: { [key: string]: number } = {}): OperatorList {
+    public appliedTypeOperators(args: { [key: string]: number } = {}): OperatorList {
         return this.opsUseArgs ? this.operators.map(op => op.appliedTypeWithArgs(args)) : this.operators;
     }
 
-    getType(namespace: { [name: string]: OperationType }): OperationType {
-        let main: OperationType = {
+    public getType(namespace: { [name: string]: OperationType }): OperationType {
+        const main: OperationType = {
             input: [],
             output: [],
-            types: {}
+            types: {},
         };
 
-        let argMap: { [name: string]: number } = {};
+        const argMap: { [name: string]: number } = {};
 
         this.namedArgs.forEach((name, i) => {
             main.input.push(i);
@@ -78,33 +76,33 @@ export class Expression implements Runnable {
             main.types[i] = {type: null};
         });
 
-        let appliedOps = this.appliedTypeOperators(argMap);
+        const appliedOps = this.appliedTypeOperators(argMap);
         appliedOps.forEach(operator => operator.applyTypes(main, namespace));
 
         cleanTypes(main);
         return main;
     }
 
-    exec(namespace: ExecNamespace): Stack {
+    public exec(namespace: ExecNamespace): Stack {
         return execOpList(this.operators, namespace);
     }
 
-    applyTo(stack: Stack, namespace: ExecNamespace): void {
-        let argMap: { [name: string]: StackValue } = {};
+    public applyTo(stack: Stack, namespace: ExecNamespace): void {
+        const argMap: { [name: string]: StackValue } = {};
 
         this.namedArgs.forEach(name => {
-            let arg = stack.pop();
-            if (typeof arg === 'undefined') {
-                throw new Error('missing arg');
+            const arg = stack.pop();
+            if (typeof arg === "undefined") {
+                throw new Error("missing arg");
             }
             argMap[name] = arg;
         });
 
-        let appliedOps = this.appliedExecOperators(argMap);
+        const appliedOps = this.appliedExecOperators(argMap);
         appliedOps.forEach(operator => operator.exec(stack, namespace));
     }
 
-    appliedExecOperators(args: { [key: string]: StackValue } = {}): OperatorList {
+    public appliedExecOperators(args: { [key: string]: StackValue } = {}): OperatorList {
         return this.opsUseArgs ? this.operators.map(op => op.appliedExecWithArgs(args)) : this.operators;
     }
 }

@@ -1,6 +1,6 @@
 
 export class RpnError {
-    type: string;
+    public type: string;
 
     constructor(type: string) {
         this.type = type;
