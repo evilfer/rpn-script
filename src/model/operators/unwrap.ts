@@ -1,12 +1,12 @@
 import {CodeToken} from "../code-token";
+import execOpListOn from "../exec/exec-on";
 import {ExecNamespace} from "../exec/namespace";
 import {Stack, StackValue} from "../exec/stack";
 import {OperationType} from "../operands/operand-types";
+import {OperatorList} from "./operator";
 import {popInputType, popTypeAndMatch, pushType} from "./process-types/basic-ops";
 import {matchExpectedWrapped} from "./process-types/match-unwrap";
 import {SingleTokenOperator} from "./single-token-operator";
-import {OperatorList} from "./operator";
-import execOpListOn from "../exec/exec-on";
 
 export class UnwrapOperator extends SingleTokenOperator {
     public arity: null | { input: number, output: number };

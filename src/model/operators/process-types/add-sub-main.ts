@@ -17,7 +17,7 @@ function addTypeFromSubToMain(main: OperationType,
             newType.array = addTypeFromSubToMain(main, sub, tx, newType.array);
         }
         if (newType.tuple) {
-            newType.tuple = newType.tuple.map(id => addTypeFromSubToMain(main, sub, tx, id));
+            newType.tuple = newType.tuple.map(tid => addTypeFromSubToMain(main, sub, tx, tid));
         }
         if (newType.wrapped) {
             newType.wrapped = addTypesFromSubToMain(main, sub, tx, newType.wrapped);

@@ -27,6 +27,16 @@ describe("dependency-manager", () => {
         });
     });
 
+    it("should solve direct dependencies (2)", () => {
+        expect(resolveDependencies([
+            {name: "a", dependencies: []},
+            {name: "b", dependencies: ["a"]},
+        ])).to.deep.eq({
+            circular: [],
+            ordered: ["a", "b"],
+        });
+    });
+
     it("should solve indirect dependencies", () => {
         expect(resolveDependencies([
             {name: "a", dependencies: ["b"]},

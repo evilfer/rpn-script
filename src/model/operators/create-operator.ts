@@ -41,7 +41,7 @@ function parseCommaSep(tokens: CodeToken[], sepAllowed: boolean): OperatorList[]
 }
 
 export function createOperators(rhs: CodeToken[]): OperatorList {
-    const operators = [];
+    const operators: OperatorList = [];
 
     for (let i = 0; i < rhs.length; i++) {
         let operator: null | Operator = null;

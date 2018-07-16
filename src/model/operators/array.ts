@@ -24,12 +24,12 @@ export class ArrayOperator extends MultipleTokenOperator {
         }
 
         pushOutputMemberTypes(current, {
-            type: "array",
             array: arrayType,
+            type: "array",
         });
     }
 
     public exec(stack: Stack, namespace: ExecNamespace): void {
-        stack.push({val: this.items.map((item) => execOpList(item, namespace)[0])});
+        stack.push({val: this.items.map(item => execOpList(item, namespace)[0])});
     }
 }

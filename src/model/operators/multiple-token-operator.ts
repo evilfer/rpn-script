@@ -8,7 +8,7 @@ export abstract class MultipleTokenOperator extends Operator {
     public childrenRequireArgs: boolean[];
     public argsRequired: boolean;
 
-    constructor(tokens: CodeToken[], items: OperatorList[]) {
+    public constructor(tokens: CodeToken[], items: OperatorList[]) {
         super();
         this.tokens = tokens;
         this.items = items;
@@ -25,7 +25,7 @@ export abstract class MultipleTokenOperator extends Operator {
         }
 
         const appliedItems: OperatorList[] = this.items.map((item, i) => this.childrenRequireArgs[i] ?
-            item.map((op) => op.appliedTypeWithArgs(args)) :
+            item.map(op => op.appliedTypeWithArgs(args)) :
             item,
         );
 

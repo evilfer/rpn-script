@@ -8,7 +8,7 @@ export type OperatorList = Operator[];
 export abstract class Operator {
     public errors: RpnError[];
 
-    constructor() {
+    protected constructor() {
         this.errors = [];
     }
 

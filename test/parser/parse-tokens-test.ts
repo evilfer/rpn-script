@@ -1,7 +1,7 @@
 import {expect} from "chai";
 import parseTokens from "../../src/parser/parse-tokens";
 
-function check(codeStr: string, result: [[number, string]]) {
+function check(codeStr: string, result: Array<[number, string]>) {
     expect(parseTokens(codeStr).map(({code, position}) => ({
         code,
         position,

@@ -36,6 +36,7 @@ function calculateFullDependencies(data: DependencyAssessData, name: string): st
                 addIfNotExists(calculateFullDependencies(data, dep), data.full[name]);
             }
         });
+        data.updating[name] = false;
     }
 
     return data.full[name];

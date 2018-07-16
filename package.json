@@ -1,27 +1,43 @@
 {
-  "name": "rpn-script",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "directories": {
-    "test": "test"
-  },
-  "scripts": {
-    "build": "tsc -p tsconfig-build.json",
-    "test": "mocha --require ts-node/register test/**/*-test.ts"
-  },
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@types/chai": "4.0.1",
-    "@types/mocha": "2.2.41",
-    "chai": "4.1.0",
-    "gulp": "3.9.1",
-    "gulp-typescript": "3.2.1",
-    "mocha": "3.4.2",
-    "ts-node": "3.2.0",
-    "tslint": "^5.5.0",
-    "typescript": "2.4.1"
-  },
-  "dependencies": {}
+    "name": "rpn-script",
+    "version": "0.0.1",
+    "description": "Parser for rpn-script",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/evilfer/rpn-script.git"
+    },
+    "bugs": {
+        "url": "https://github.com/evilfer/rpn-script/issues"
+    },
+    "homepage": "https://github.com/evilfer/rpn-script#readme",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "directories": {
+        "test": "test"
+    },
+    "scripts": {
+        "prepublishOnly": "npm run build",
+        "build": "npm run clean && tsc -p tsconfig-build.json",
+        "test": "mocha --require ts-node/register test/**/*-test.ts",
+        "clean": "rimraf dist"
+    },
+    "author": "Eloy Villasclaras <eloy.villasclaras@gmail.com>",
+    "license": "MIT",
+    "devDependencies": {
+        "@types/chai": "4.1.4",
+        "@types/extend": "^3.0.0",
+        "@types/mocha": "5.2.5",
+        "chai": "4.1.2",
+        "mocha": "5.2.0",
+        "rimraf": "^2.6.2",
+        "ts-node": "7.0.0",
+        "tslint": "5.11.0",
+        "typescript": "2.9.2"
+    },
+    "dependencies": {
+        "extend": "^3.0.1"
+    },
+    "files": [
+        "dist"
+    ]
 }

@@ -12,8 +12,8 @@ export function matchExpectedWrapped(main: OperationType,
             }
             ot.type = "wrapped";
             ot.wrapped = {
-                input: [...Array(arity.input).keys()].map(_ => addAnyType(main)),
-                output: [...Array(arity.output).keys()].map(_ => addAnyType(main)),
+                input: [...Array(arity.input).keys()].map(() => addAnyType(main)),
+                output: [...Array(arity.output).keys()].map(() => addAnyType(main)),
             };
             break;
         case "wrapped":

@@ -1,11 +1,14 @@
 {
     "compilerOptions": {
-        "target": "es6",
-        "declaration": true,
-        "strictNullChecks": true,
-        "noImplicitAny": true,
+        "moduleResolution": "node",
+        "module": "commonjs",
+        "target": "es2015",
         "experimentalDecorators": true,
-        "outDir": "./build",
+        "noImplicitAny": false,
+        "noImplicitThis": true,
+        "strictNullChecks": true,
+        "declaration": true,
+        "outDir": "./dist",
         "sourceMap": true
     }
 }
